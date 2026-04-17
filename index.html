@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📈 A股量化选股系统</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;background:linear-gradient(180deg,#0f0c29,#302b63,#24243e);min-height:100vh;color:#fff;padding:20px}
+.container{max-width:520px;margin:0 auto}
+
+/* 头部 */
+.header{text-align:center;padding:40px 0 20px}
+.logo{width:80px;height:80px;border-radius:24px;background:linear-gradient(135deg,#f093fb,#f5576c);margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:36px;box-shadow:0 8px 32px rgba(240,147,251,.3)}
+.header h1{font-size:22px;font-weight:700;letter-spacing:1px}
+.header p{font-size:13px;color:rgba(255,255,255,.45);margin-top:6px}
+.header .version{display:inline-block;background:rgba(255,255,255,.08);border-radius:12px;padding:3px 12px;font-size:11px;color:rgba(255,255,255,.35);margin-top:12px}
+
+/* 今日概览 */
+.today-card{border-radius:20px;padding:24px;margin:20px 0;background:linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.06)}
+.today-card h3{font-size:14px;color:rgba(255,255,255,.4);margin-bottom:12px}
+.today-status{display:flex;align-items:center;gap:16px;margin-bottom:12px}
+.today-icon{font-size:40px}
+.today-info .signal-text{font-size:18px;font-weight:700}
+.today-info .signal-text.green{color:#00e676}
+.today-info .signal-text.yellow{color:#ffd740}
+.today-info .signal-text.red{color:#ff5252}
+.today-info .date-text{font-size:12px;color:rgba(255,255,255,.3);margin-top:4px}
+
+/* 统计卡 */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0}
+.stat-item{background:rgba(255,255,255,.05);border-radius:14px;padding:16px;text-align:center;border:1px solid rgba(255,255,255,.04)}
+.stat-item .val{font-size:22px;font-weight:700}
+.stat-item .val.green{color:#00e676}
+.stat-item .val.blue{color:#00d4ff}
+.stat-item .val.yellow{color:#ffd740}
+.stat-item .val.pink{color:#f093fb}
+.stat-item .label{font-size:10px;color:rgba(255,255,255,.3);margin-top:6px}
+
+/* 信号追踪 */
+.tracking-card{border-radius:20px;padding:20px;margin:16px 0;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
+.tracking-card h3{font-size:14px;color:rgba(255,255,255,.4);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.track-item{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.track-item:last-child{border-bottom:none}
+.track-left .name{font-size:15px;font-weight:600}
+.track-left .meta{font-size:11px;color:rgba(255,255,255,.3);margin-top:2px}
+.track-right .return{font-size:16px;font-weight:700}
+.track-right .return.up{color:#00e676}
+.track-right .return.down{color:#ff5252}
+.track-right .status{font-size:10px;color:rgba(255,255,255,.25);text-align:right;margin-top:2px}
+.track-empty{text-align:center;padding:20px;color:rgba(255,255,255,.2);font-size:13px}
+
+/* 历史报告 */
+.section-label{font-size:14px;color:rgba(255,255,255,.4);margin:24px 0 12px;padding-left:4px;display:flex;justify-content:space-between;align-items:center}
+.section-label a{font-size:11px;color:rgba(255,255,255,.2);text-decoration:none}
+
+.report-item{display:flex;align-items:center;padding:16px;background:rgba(255,255,255,.04);border-radius:14px;margin:8px 0;border:1px solid rgba(255,255,255,.04);text-decoration:none;color:#fff;transition:all .2s}
+.report-item:hover{background:rgba(255,255,255,.08);transform:translateX(4px)}
+.report-date{font-size:15px;font-weight:600;min-width:90px}
+.report-weekday{font-size:12px;color:rgba(255,255,255,.25);min-width:40px}
+.report-signal{flex:1;text-align:right;font-size:13px}
+.report-signal.has-signal{color:#00e676}
+.report-signal.no-signal{color:rgba(255,255,255,.25)}
+.report-arrow{color:rgba(255,255,255,.15);margin-left:8px;font-size:12px}
+
+/* 风格切换 */
+.style-bar{display:flex;gap:8px;margin:20px 0;padding:12px;background:rgba(255,255,255,.03);border-radius:14px}
+.style-btn{flex:1;text-align:center;padding:10px;border-radius:10px;font-size:12px;cursor:pointer;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02);color:rgba(255,255,255,.35);text-decoration:none;transition:all .2s}
+.style-btn:hover{border-color:rgba(255,255,255,.15);color:rgba(255,255,255,.5)}
+.style-btn.active{background:linear-gradient(135deg,#f093fb,#f5576c);color:#fff;border-color:transparent;font-weight:600}
+
+/* 运行按钮 */
+.run-btn{display:block;width:100%;padding:14px;border-radius:14px;text-align:center;font-size:15px;font-weight:600;background:linear-gradient(135deg,#f093fb,#f5576c);color:#fff;border:none;cursor:pointer;margin:20px 0;text-decoration:none;box-shadow:0 4px 24px rgba(240,147,251,.3)}
+.run-btn:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(240,147,251,.4)}
+
+.divider{height:1px;background:rgba(255,255,255,.04);margin:16px 0}
+
+.footer{text-align:center;color:rgba(255,255,255,.15);font-size:11px;margin-top:30px;padding:20px 0;line-height:2}
+
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.float{animation:float 3s ease-in-out infinite}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- 头部 -->
+<div class="header">
+<div class="logo">📈</div>
+<h1>A股量化选股系统</h1>
+<p>多因子评分 · 只推高置信度 · 每日自动更新</p>
+<div class="version">v2.0 · 4策略评分≥70</div>
+</div>
+
+<!-- 今日概览（JS动态填充） -->
+<div id="today-card" class="today-card">
+<h3>📊 今日概览</h3>
+<div class="today-status">
+<div class="today-icon float" id="today-icon">🛡️</div>
+<div class="today-info">
+<div class="signal-text green" id="today-signal">加载中...</div>
+<div class="date-text" id="today-date"></div>
+</div>
+</div>
+</div>
+
+<!-- 统计概览 -->
+<div class="stats-row">
+<div class="stat-item"><div class="val green" id="stat-winrate">--</div><div class="label">信号胜率</div></div>
+<div class="stat-item"><div class="val blue" id="stat-sharpe">--</div><div class="label">夏普比率</div></div>
+<div class="stat-item"><div class="val yellow" id="stat-drawdown">--</div><div class="label">最大回撤</div></div>
+</div>
+
+<!-- 信号追踪 -->
+<div class="tracking-card">
+<h3>🔍 信号追踪</h3>
+<div id="tracking-list">
+<div class="track-empty">暂无持仓追踪记录</div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 默认报告风格 -->
+<div class="section-label">
+<span>🎨 默认报告风格</span>
+</div>
+<div class="style-bar" id="style-bar">
+<a class="style-btn active" data-style="social" onclick="setStyle('social')">🎨 社交卡片</a>
+<a class="style-btn" data-style="broker" onclick="setStyle('broker')">📰 券商晨报</a>
+<a class="style-btn" data-style="hacker" onclick="setStyle('hacker')">💻 黑客终端</a>
+</div>
+
+<!-- 历史报告 -->
+<div class="section-label">
+<span>📅 历史报告</span>
+</div>
+<div id="report-list">
+<div class="track-empty">加载中...</div>
+</div>
+
+<div class="footer">
+⚠️ 量化分析仅供参考，不构成投资建议<br>
+策略：多因子评分≥70 | 数据源：腾讯行情+新浪K线<br>
+每个交易日15:30自动更新<br>
+❤️ Powered by Quant System v2.0
+</div>
+
+</div>
+
+<script>
+// 默认风格
+let defaultStyle = localStorage.getItem('quant-style') || 'social';
+
+// 页面加载
+document.addEventListener('DOMContentLoaded', () => {
+    updateStyleButtons();
+    loadReportList();
+    loadTracking();
+});
+
+function setStyle(style) {
+    defaultStyle = style;
+    localStorage.setItem('quant-style', style);
+    updateStyleButtons();
+    // 重新渲染报告链接
+    loadReportList();
+    return false;
+}
+
+function updateStyleButtons() {
+    document.querySelectorAll('.style-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.style === defaultStyle);
+    });
+}
+
+async function loadReportList() {
+    try {
+        const resp = await fetch('data/report-list.json');
+        const reports = await resp.json();
+        
+        if (!reports.length) {
+            document.getElementById('report-list').innerHTML = '<div class="track-empty">暂无报告</div>';
+            return;
+        }
+        
+        // 更新今日概览
+        const latest = reports[0];
+        const todayIcon = document.getElementById('today-icon');
+        const todaySignal = document.getElementById('today-signal');
+        const todayDate = document.getElementById('today-date');
+        
+        if (latest.signal_count > 0) {
+            todayIcon.textContent = '🎯';
+            todaySignal.textContent = `${latest.signal_count}只信号股达标`;
+            todaySignal.className = 'signal-text green';
+        } else {
+            todayIcon.textContent = '🛡️';
+            todaySignal.textContent = '今日空仓，无买入信号';
+            todaySignal.className = 'signal-text yellow';
+        }
+        todayDate.textContent = `${latest.date} ${latest.weekday} · 扫描${latest.total_scanned}只`;
+        
+        // 渲染报告列表
+        let html = '';
+        reports.forEach(r => {
+            const hasSignal = r.signal_count > 0;
+            const signalText = hasSignal ? `🎯 ${r.signal_count}只信号` : '🛡️ 空仓';
+            const signalCls = hasSignal ? 'has-signal' : 'no-signal';
+            html += `<a class="report-item" href="reports/${r.date}/${defaultStyle}.html">
+                <span class="report-date">${r.date.slice(5)}</span>
+                <span class="report-weekday">${r.weekday}</span>
+                <span class="report-signal ${signalCls}">${signalText}</span>
+                <span class="report-arrow">→</span>
+            </a>`;
+        });
+        document.getElementById('report-list').innerHTML = html;
+        
+    } catch(e) {
+        // 没有report-list时，尝试扫描reports目录
+        document.getElementById('report-list').innerHTML = '<div class="track-empty">暂无报告数据</div>';
+        document.getElementById('today-signal').textContent = '等待首次运行';
+    }
+}
+
+async function loadTracking() {
+    try {
+        const resp = await fetch('data/tracking.json');
+        const tracking = await resp.json();
+        
+        const list = document.getElementById('tracking-list');
+        
+        if (!tracking.active || tracking.active.length === 0) {
+            if (tracking.closed && tracking.closed.length > 0) {
+                // 显示最近平仓记录
+                let html = '';
+                const recent = tracking.closed.slice(-3).reverse();
+                recent.forEach(t => {
+                    const ret = (t.current_return || 0);
+                    const cls = ret >= 0 ? 'up' : 'down';
+                    const icon = ret >= 0 ? '✅' : '❌';
+                    html += `<div class="track-item">
+                        <div class="track-left">
+                            <div class="name">${icon} ${t.name} (${t.code})</div>
+                            <div class="meta">${t.entry_date} 买入 · ${t.exit_reason || '已平仓'}</div>
+                        </div>
+                        <div class="track-right">
+                            <div class="return ${cls}">${ret>=0?'+':''}${ret.toFixed(2)}%</div>
+                            <div class="status">已平仓</div>
+                        </div>
+                    </div>`;
+                });
+                list.innerHTML = html;
+            }
+            return;
+        }
+        
+        let html = '';
+        tracking.active.forEach(t => {
+            const ret = (t.current_return || 0);
+            const cls = ret >= 0 ? 'up' : 'down';
+            const days = t.days || 0;
+            html += `<div class="track-item">
+                <div class="track-left">
+                    <div class="name">📊 ${t.name} (${t.code})</div>
+                    <div class="meta">${t.entry_date} 买入 · ${t.entry_score}分 · 持仓${days}天</div>
+                </div>
+                <div class="track-right">
+                    <div class="return ${cls}">${ret>=0?'+':''}${ret.toFixed(2)}%</div>
+                    <div class="status">持仓中</div>
+                </div>
+            </div>`;
+        });
+        list.innerHTML = html;
+        
+        // 更新统计
+        if (tracking.summary) {
+            const s = tracking.summary;
+            if (s.total_signals > 0) {
+                const wr = ((s.wins / s.total_signals) * 100).toFixed(1);
+                document.getElementById('stat-winrate').textContent = wr + '%';
+            }
+        }
+        
+    } catch(e) {
+        // 没有tracking数据
+    }
+}
+</script>
+</body>
+</html>
