@@ -1,5 +1,6 @@
 ---
 license: mit
+sdk: docker
 tags:
   - quant
   - stock
