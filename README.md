@@ -1,25 +1,21 @@
 ---
-# 详细文档见https://modelscope.cn/docs/%E5%88%9B%E7%A9%BA%E9%97%B4%E5%8D%A1%E7%89%87
-domain: #领域：cv/nlp/audio/multi-modal/AutoML
-# - cv
-tags: #自定义标签
--
-datasets: #关联数据集
-  evaluation:
-  #- iic/ICDAR13_HCTR_Dataset
-  test:
-  #- iic/MTWI
-  train:
-  #- iic/SIBR
-models: #关联模型
-#- iic/ofa_ocr-recognition_general_base_zh
-
-## 启动文件(若SDK为Gradio/Streamlit，默认为app.py, 若为Static HTML, 默认为index.html)
-# deployspec:
-#   entry_file: app.py
-license: Apache License 2.0
+license: mit
+tags:
+  - quant
+  - stock
+models: []
+datasets: []
 ---
-#### Clone with HTTP
+
+# 📈 A股量化日报系统
+
+多因子评分选股系统，每日自动生成3种风格报告（社交卡片 / 券商晨报 / 黑客终端）。
+
+## 部署
+
 ```bash
- git clone https://www.modelscope.cn/studios/kuozi002/quant-report.git
+docker build -t quant-report .
+docker run -d -p 8080:80 quant-report
 ```
+
+访问 `http://localhost:8080`
