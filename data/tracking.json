@@ -1,8 +1,20 @@
 {
-  "active": [],
+  "active": [
+    {
+      "name": "格力电器",
+      "code": "000651",
+      "entry_date": "2026-04-29",
+      "entry_price": 40.47,
+      "entry_score": 71.0,
+      "current_price": 40.47,
+      "current_return": 0,
+      "status": "holding",
+      "days": 0
+    }
+  ],
   "closed": [],
   "summary": {
-    "total_signals": 0,
+    "total_signals": 1,
     "wins": 0,
     "total_return": 0
   }
