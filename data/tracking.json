@@ -6,8 +6,8 @@
       "entry_date": "2026-04-29",
       "entry_price": 40.47,
       "entry_score": 71.0,
-      "current_price": 40.47,
-      "current_return": 0,
+      "current_price": 40.05,
+      "current_return": -1.04,
       "status": "holding",
       "days": 1
     },
@@ -18,7 +18,7 @@
       "entry_price": 27.46,
       "entry_score": 76.0,
       "current_price": 27.46,
-      "current_return": 0,
+      "current_return": 0.0,
       "status": "holding",
       "days": 0
     }
