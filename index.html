@@ -32,6 +32,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;backg
 .stat-item{background:rgba(255,255,255,.05);border-radius:14px;padding:16px;text-align:center;border:1px solid rgba(255,255,255,.04)}
 .stat-item .val{font-size:22px;font-weight:700}
 .stat-item .val.green{color:#00e676}
+.val.red{color:#ff5252}
 .stat-item .val.blue{color:#00d4ff}
 .stat-item .val.yellow{color:#ffd740}
 .stat-item .val.pink{color:#f093fb}
@@ -116,7 +117,10 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
 <!-- 统计概览 -->
 <div class="stats-row">
 <div class="stat-item"><div class="val green" id="stat-winrate">--</div><div class="label">信号胜率</div></div>
-<div class="stat-item"><div class="val blue" id="stat-sharpe">--</div><div class="label">夏普比率</div></div>
+<div class="stat-item"><div class="val blue" id="stat-avgreturn">--</div><div class="label">平均每笔收益</div></div>
+<div class="stat-item"><div class="val yellow" id="stat-sharpe">--</div><div class="label">夏普比率</div></div>
+</div>
+<div class="stats-row">
 <div class="stat-item"><div class="val yellow" id="stat-drawdown">--</div><div class="label">最大回撤</div></div>
 </div>
 
