@@ -1,15 +1,18 @@
 {
-  "active": [
+  "active": [],
+  "closed": [
     {
       "name": "格力电器",
       "code": "000651",
       "entry_date": "2026-04-29",
       "entry_price": 40.47,
       "entry_score": 71.0,
-      "current_price": 40.05,
-      "current_return": -1.04,
-      "status": "holding",
-      "days": 2
+      "current_price": 39.95,
+      "current_return": -1.28,
+      "status": "timeout",
+      "days": 2,
+      "exit_date": "2026-05-06",
+      "exit_reason": "持有7天，自动平仓"
     },
     {
       "name": "伊利股份",
@@ -17,16 +20,17 @@
       "entry_date": "2026-04-30",
       "entry_price": 27.46,
       "entry_score": 76.0,
-      "current_price": 27.46,
-      "current_return": 0.0,
-      "status": "holding",
-      "days": 1
+      "current_price": 27.45,
+      "current_return": -0.04,
+      "status": "timeout",
+      "days": 1,
+      "exit_date": "2026-05-06",
+      "exit_reason": "持有6天，自动平仓"
     }
   ],
-  "closed": [],
   "summary": {
     "total_signals": 2,
     "wins": 0,
-    "total_return": 0
+    "total_return": -1.32
   }
 }
