@@ -242,48 +242,54 @@ async function loadTracking() {
         const tracking = await resp.json();
         
         const list = document.getElementById('tracking-list');
+        let html = '';
         
-        if (!tracking.active || tracking.active.length === 0) {
-            if (tracking.closed && tracking.closed.length > 0) {
-                // 显示最近平仓记录
-                let html = '';
-                const recent = tracking.closed.slice(-3).reverse();
-                recent.forEach(t => {
-                    const ret = (t.current_return || 0);
-                    const cls = ret >= 0 ? 'up' : 'down';
-                    const icon = ret >= 0 ? '✅' : '❌';
-                    html += `<div class="track-item">
-                        <div class="track-left">
-                            <div class="name">${icon} ${t.name} (${t.code})</div>
-                            <div class="meta">${t.entry_date} 买入 · ${t.exit_reason || '已平仓'}</div>
-                        </div>
-                        <div class="track-right">
-                            <div class="return ${cls}">${ret>=0?'+':''}${ret.toFixed(2)}%</div>
-                            <div class="status">已平仓</div>
-                        </div>
-                    </div>`;
-                });
-                list.innerHTML = html;
-            }
+        // 持仓中
+        if (tracking.active && tracking.active.length > 0) {
+            tracking.active.forEach(t => {
+                const ret = (t.current_return || 0);
+                const cls = ret >= 0 ? 'up' : 'down';
+                const days = t.days || 0;
+                html += `<div class="track-item">
+                    <div class="track-left">
+                        <div class="name">📊 ${t.name} (${t.code})</div>
+                        <div class="meta">${t.entry_date} 买入 · ${t.entry_score}分 · 持仓${days}天</div>
+                    </div>
+                    <div class="track-right">
+                        <div class="return ${cls}">${ret>=0?'+':''}${ret.toFixed(2)}%</div>
+                        <div class="status">持仓中</div>
+                    </div>
+                </div>`;
+            });
+        }
+        
+        // 已平仓
+        if (tracking.closed && tracking.closed.length > 0) {
+            // 按平仓日期倒序，显示所有
+            const sorted = [...tracking.closed].reverse();
+            sorted.forEach(t => {
+                const ret = (t.current_return || 0);
+                const cls = ret >= 0 ? 'up' : 'down';
+                const icon = ret >= 0 ? '✅' : '❌';
+                const exitInfo = t.exit_date ? `${t.exit_date} · ${t.exit_reason || '已平仓'}` : (t.exit_reason || '已平仓');
+                html += `<div class="track-item" style="opacity:0.75">
+                    <div class="track-left">
+                        <div class="name">${icon} ${t.name} (${t.code})</div>
+                        <div class="meta">${t.entry_date} → ${exitInfo}</div>
+                    </div>
+                    <div class="track-right">
+                        <div class="return ${cls}">${ret>=0?'+':''}${ret.toFixed(2)}%</div>
+                        <div class="status">已平仓</div>
+                    </div>
+                </div>`;
+            });
+        }
+        
+        if (!html) {
+            list.innerHTML = '<div class="track-empty">暂无持仓追踪记录</div>';
             return;
         }
         
-        let html = '';
-        tracking.active.forEach(t => {
-            const ret = (t.current_return || 0);
-            const cls = ret >= 0 ? 'up' : 'down';
-            const days = t.days || 0;
-            html += `<div class="track-item">
-                <div class="track-left">
-                    <div class="name">📊 ${t.name} (${t.code})</div>
-                    <div class="meta">${t.entry_date} 买入 · ${t.entry_score}分 · 持仓${days}天</div>
-                </div>
-                <div class="track-right">
-                    <div class="return ${cls}">${ret>=0?'+':''}${ret.toFixed(2)}%</div>
-                    <div class="status">持仓中</div>
-                </div>
-            </div>`;
-        });
         list.innerHTML = html;
         
         // 更新统计
