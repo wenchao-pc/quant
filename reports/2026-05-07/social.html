@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📈 量化日报 | 2026-05-07</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;background:linear-gradient(180deg,#0f0c29,#302b63,#24243e);min-height:100vh;color:#fff;padding:20px}
+.container{max-width:480px;margin:0 auto}
+.header{text-align:center;padding:30px 0 20px}
+.avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#f093fb,#f5576c);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:28px}
+.header h2{font-size:18px;font-weight:600}
+.header p{font-size:13px;color:rgba(255,255,255,.5);margin-top:4px}
+.date-tag{display:inline-block;background:rgba(255,255,255,.1);border-radius:20px;padding:4px 14px;font-size:12px;color:rgba(255,255,255,.6);margin-top:10px}
+.signal-card{border-radius:20px;padding:28px;margin:16px 0;text-align:center}
+.signal-none{background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid rgba(255,255,255,.08)}
+.signal-yes{background:linear-gradient(135deg,#0d3b0d,#1a5c1a);border:1px solid rgba(0,230,118,.2)}
+.signal-icon{font-size:52px;margin-bottom:10px}
+.signal-title{font-size:20px;font-weight:700;margin-bottom:6px}
+.signal-desc{font-size:13px;color:rgba(255,255,255,.5);line-height:1.6}
+.stock-card{border-radius:16px;padding:20px;margin:12px 0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08)}
+.stock-top{display:flex;justify-content:space-between;align-items:center}
+.stock-info h3{font-size:18px;font-weight:600}
+.stock-info span{font-size:12px;color:rgba(255,255,255,.4)}
+.score-ring{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700}
+.score-high{background:linear-gradient(135deg,#00e676,#69f0ae);color:#000}
+.score-mid{background:linear-gradient(135deg,#ffd740,#ffab00);color:#000}
+.score-low{background:rgba(255,255,255,.1);color:rgba(255,255,255,.4)}
+.progress-bar{height:6px;background:rgba(255,255,255,.1);border-radius:3px;margin:14px 0 8px;overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#f5576c,#f093fb)}
+.stock-meta{display:flex;gap:16px;font-size:13px}
+.stock-meta .up{color:#ff5252}
+.stock-meta .down{color:#00e676}
+.stock-meta .muted{color:rgba(255,255,255,.35)}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.tag{padding:4px 10px;border-radius:12px;font-size:11px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.5)}
+.tag-green{background:rgba(0,230,118,.15);color:#69f0ae}
+.divider{height:1px;background:rgba(255,255,255,.06);margin:20px 0}
+.section-label{font-size:13px;color:rgba(255,255,255,.35);margin-bottom:12px;padding-left:4px}
+.stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:12px 0}
+.stat-item{background:rgba(255,255,255,.05);border-radius:12px;padding:16px;text-align:center}
+.stat-item .val{font-size:22px;font-weight:700}
+.stat-item .val.green{color:#00e676}
+.val.red{color:#ff5252}
+.stat-item .val.blue{color:#00d4ff}
+.stat-item .val.yellow{color:#ffd740}
+.stat-item .label{font-size:11px;color:rgba(255,255,255,.35);margin-top:4px}
+.advice-card{background:rgba(255,255,255,.05);border-radius:16px;padding:20px;margin:16px 0;border-left:3px solid #f093fb}
+.advice-card h4{font-size:14px;margin-bottom:10px;color:#f093fb}
+.advice-card li{font-size:13px;color:rgba(255,255,255,.6);margin:6px 0;margin-left:16px}
+.index-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.index-card{background:rgba(255,255,255,.05);border-radius:12px;padding:12px;text-align:center}
+.index-name{font-size:11px;color:rgba(255,255,255,.4)}
+.index-price{font-size:16px;font-weight:600;margin:4px 0}
+.index-change{font-size:13px;font-weight:600}
+.index-change.up{color:#ff5252}
+.index-change.down{color:#00e676}
+.nav-header{position:fixed;top:0;left:0;right:0;height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100;background:rgba(18,18,26,.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.06)}
+.nav-home{color:rgba(255,255,255,.5);text-decoration:none;font-size:14px;display:flex;align-items:center;gap:6px;transition:color .2s;cursor:pointer}
+.nav-home:hover{color:rgba(255,255,255,.8)}
+.nav-switch{display:flex;gap:6px}
+.style-btn{padding:6px 12px;border:1px solid rgba(255,255,255,.15);border-radius:16px;font-size:11px;background:transparent;cursor:pointer;text-decoration:none;color:rgba(255,255,255,.4);transition:all .2s}
+.style-btn:hover{border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.6)}
+.style-btn.active{background:rgba(240,147,251,.2);border-color:#f093fb;color:#f093fb}
+body{padding-top:56px}
+.footer{text-align:center;color:rgba(255,255,255,.2);font-size:11px;margin-top:30px;padding:20px}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.float{animation:float 3s ease-in-out infinite}
+</style>
+<script charset="UTF-8" id="LA_COLLECT" src="//sdk.51.la/js-sdk-pro.min.js"></script>
+<script>LA.init({id:"3Pf3gbq7pCRUtZy0",ck:"3Pf3gbq7pCRUtZy0"})</script>
+<script type="text/javascript">
+(function(c,l,a,r,i,t,y){
+c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+})(window, document, "clarity", "script", "wdfbljiech");
+</script>
+</head>
+<body>
+<div class="nav-header">
+<a class="nav-home" onclick="location.href='../../index.html'">🏠 主页</a>
+<div class="nav-switch">
+<span class="style-btn active">社交风</span>
+<a href="broker.html" class="style-btn">券商风</a>
+<a href="hacker.html" class="style-btn">终端风</a>
+</div>
+</div>
+<div class="container">
+<div class="header">
+<div class="avatar">📈</div>
+<h2>量化日报</h2>
+<p>多因子评分 · 只推高置信度信号</p>
+<div class="date-tag">2026-05-07 周四</div>
+</div>
+
+<div class="section-label">📊 大盘</div>
+<div class="index-row">
+<div class="index-card"><div class="index-name">上证指数</div><div class="index-price">4,180.09</div><div class="index-change up">+0.48%</div></div>
+<div class="index-card"><div class="index-name">深证成指</div><div class="index-price">15,641.89</div><div class="index-change up">+1.18%</div></div>
+<div class="index-card"><div class="index-name">创业板指</div><div class="index-price">3,833.06</div><div class="index-change up">+1.45%</div></div>
+
+</div>
+
+<div class="signal-card signal-none">
+<div class="signal-icon float">🛡️</div>
+<div class="signal-title">今日空仓</div>
+<div class="signal-desc">
+全市场4061只股票扫描完毕<br>
+最高分59.0（中国长城），未达70分阈值<br>
+<b style="color:rgba(255,255,255,.8)">不操作 = 最好的操作</b>
+</div>
+</div>
+
+<div class="divider"></div>
+<div class="section-label">⚡ 最接近阈值的股票</div>
+
+<div class="stock-card">
+<div class="stock-top">
+<div class="stock-info"><h3>中国长城</h3><span>000066</span></div>
+<div class="score-ring score-low">59.0</div>
+</div>
+<div class="progress-bar"><div class="progress-fill" style="width:59.0%"></div></div>
+<div class="stock-meta">
+<span class="up">▲ +10.00%</span>
+<span class="muted">成交120.0亿</span>
+<span class="muted">差11分达标</span>
+</div>
+</div>
+<div class="stock-card">
+<div class="stock-top">
+<div class="stock-info"><h3>通富微电</h3><span>002156</span></div>
+<div class="score-ring score-low">47.5</div>
+</div>
+<div class="progress-bar"><div class="progress-fill" style="width:47.5%"></div></div>
+<div class="stock-meta">
+<span class="up">▲ +3.74%</span>
+<span class="muted">成交148.4亿</span>
+<span class="muted">差22分达标</span>
+</div>
+</div>
+<div class="stock-card">
+<div class="stock-top">
+<div class="stock-info"><h3>蓝色光标</h3><span>300058</span></div>
+<div class="score-ring score-low">41.5</div>
+</div>
+<div class="progress-bar"><div class="progress-fill" style="width:41.5%"></div></div>
+<div class="stock-meta">
+<span class="up">▲ +6.93%</span>
+<span class="muted">成交143.6亿</span>
+<span class="muted">差28分达标</span>
+</div>
+</div>
+
+
+<div class="divider"></div>
+<div class="section-label">🔥 活跃股TOP10</div>
+<div class="stock-card" style="padding:10px 14px">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div><span style="color:rgba(255,255,255,.3);font-size:11px;margin-right:6px">#1</span><b>通富微电</b> <span class="muted">002156</span></div>
+<div style="text-align:right"><span style="color:rgba(255,255,255,.5);font-weight:700">47.5</span> <span style="color:rgba(255,255,255,.2);font-size:11px">观望</span></div>
+</div>
+<div class="stock-meta" style="margin-top:4px">
+<span class="up">▲ +3.74%</span>
+<span class="muted">成交148.4亿</span>
+</div>
+</div>
+<div class="stock-card" style="padding:10px 14px">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div><span style="color:rgba(255,255,255,.3);font-size:11px;margin-right:6px">#2</span><b>立讯精密</b> <span class="muted">002475</span></div>
+<div style="text-align:right"><span style="color:rgba(255,255,255,.5);font-weight:700">19.5</span> <span style="color:rgba(255,255,255,.2);font-size:11px">观望</span></div>
+</div>
+<div class="stock-meta" style="margin-top:4px">
+<span class="up">▲ +3.64%</span>
+<span class="muted">成交146.8亿</span>
+</div>
+</div>
+<div class="stock-card" style="padding:10px 14px">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div><span style="color:rgba(255,255,255,.3);font-size:11px;margin-right:6px">#3</span><b>蓝色光标</b> <span class="muted">300058</span></div>
+<div style="text-align:right"><span style="color:rgba(255,255,255,.5);font-weight:700">41.5</span> <span style="color:rgba(255,255,255,.2);font-size:11px">观望</span></div>
+</div>
+<div class="stock-meta" style="margin-top:4px">
+<span class="up">▲ +6.93%</span>
+<span class="muted">成交143.6亿</span>
+</div>
+</div>
+<div class="stock-card" style="padding:10px 14px">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div><span style="color:rgba(255,255,255,.3);font-size:11px;margin-right:6px">#4</span><b>亨通光电</b> <span class="muted">600487</span></div>
+<div style="text-align:right"><span style="color:rgba(255,255,255,.5);font-weight:700">22.5</span> <span style="color:rgba(255,255,255,.2);font-size:11px">观望</span></div>
+</div>
+<div class="stock-meta" style="margin-top:4px">
+<span class="up">▲ +5.79%</span>
+<span class="muted">成交142.0亿</span>
+</div>
+</div>
+<div class="stock-card" style="padding:10px 14px">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div><span style="color:rgba(255,255,255,.3);font-size:11px;margin-right:6px">#5</span><b>华工科技</b> <span class="muted">000988</span></div>
+<div style="text-align:right"><span style="color:rgba(255,255,255,.5);font-weight:700">40.0</span> <span style="color:rgba(255,255,255,.2);font-size:11px">观望</span></div>
+</div>
+<div class="stock-meta" style="margin-top:4px">
+<span class="up">▲ +6.64%</span>
+<span class="muted">成交138.5亿</span>
+</div>
+</div>
+<div class="stock-card" style="padding:10px 14px">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div><span style="color:rgba(255,255,255,.3);font-size:11px;margin-right:6px">#6</span><b>工业富联</b> <span class="muted">601138</span></div>
+<div style="text-align:right"><span style="color:rgba(255,255,255,.5);font-weight:700">19.5</span> <span style="color:rgba(255,255,255,.2);font-size:11px">观望</span></div>
+</div>
+<div class="stock-meta" style="margin-top:4px">
+<span class="up">▲ +1.74%</span>
+<span class="muted">成交134.6亿</span>
+</div>
+</div>
+<div class="stock-card" style="padding:10px 14px">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div><span style="color:rgba(255,255,255,.3);font-size:11px;margin-right:6px">#7</span><b>中国长城</b> <span class="muted">000066</span></div>
+<div style="text-align:right"><span style="color:rgba(255,255,255,.5);font-weight:700">59.0</span> <span style="color:#ffd740;font-size:11px">接近</span></div>
+</div>
+<div class="stock-meta" style="margin-top:4px">
+<span class="up">▲ +10.00%</span>
+<span class="muted">成交120.0亿</span>
+</div>
+</div>
+<div class="stock-card" style="padding:10px 14px">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div><span style="color:rgba(255,255,255,.3);font-size:11px;margin-right:6px">#8</span><b>紫金矿业</b> <span class="muted">601899</span></div>
+<div style="text-align:right"><span style="color:rgba(255,255,255,.5);font-weight:700">3.0</span> <span style="color:rgba(255,255,255,.2);font-size:11px">观望</span></div>
+</div>
+<div class="stock-meta" style="margin-top:4px">
+<span class="up">▲ +0.73%</span>
+<span class="muted">成交116.2亿</span>
+</div>
+</div>
+<div class="stock-card" style="padding:10px 14px">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div><span style="color:rgba(255,255,255,.3);font-size:11px;margin-right:6px">#9</span><b>光迅科技</b> <span class="muted">002281</span></div>
+<div style="text-align:right"><span style="color:rgba(255,255,255,.5);font-weight:700">32.5</span> <span style="color:rgba(255,255,255,.2);font-size:11px">观望</span></div>
+</div>
+<div class="stock-meta" style="margin-top:4px">
+<span class="up">▲ +8.93%</span>
+<span class="muted">成交112.9亿</span>
+</div>
+</div>
+<div class="stock-card" style="padding:10px 14px">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div><span style="color:rgba(255,255,255,.3);font-size:11px;margin-right:6px">#10</span><b>信维通信</b> <span class="muted">300136</span></div>
+<div style="text-align:right"><span style="color:rgba(255,255,255,.5);font-weight:700">40.0</span> <span style="color:rgba(255,255,255,.2);font-size:11px">观望</span></div>
+</div>
+<div class="stock-meta" style="margin-top:4px">
+<span class="up">▲ +4.55%</span>
+<span class="muted">成交108.8亿</span>
+</div>
+</div>
+
+
+<div class="divider"></div>
+<div class="section-label">📈 策略战绩</div>
+<div class="stats-row">
+<div class="stat-item"><div class="val green">63.6%</div><div class="label">信号胜率(≥70)</div></div>
+<div class="stat-item"><div class="val red">+2.66%</div><div class="label">平均每笔收益</div></div>
+<div class="stat-item"><div class="val blue">2.36</div><div class="label">夏普比率</div></div>
+<div class="stat-item"><div class="val green">-2.72%</div><div class="label">最大回撤</div></div>
+</div>
+
+<div class="advice-card">
+<h4>💡 今日操作建议</h4>
+<ul>
+<li>🛡️ 空仓观望，耐心等待信号</li>
+<li>📐 信号出现时：+5%止盈 / -3%止损，持有2-3天</li>
+<li>💸 单只仓位≤20%，不追涨停</li>
+<li>⏳ 70+信号平均每周1-2次</li>
+</ul>
+</div>
+
+<div class="footer">
+⚠️ 仅供参考，不构成投资建议<br>
+每个交易日15:30自动更新 · <a href="../../index.html" style="color:rgba(255,255,255,.3)">🏠 返回主页</a><br>
+❤️ 量化选股系统 v2.0
+</div>
+</div>
+</body>
+</html>
