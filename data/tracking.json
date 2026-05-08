@@ -1,15 +1,15 @@
 {
   "active": [
     {
-      "name": "伊利股份",
-      "code": "600887",
-      "entry_date": "2026-04-30",
-      "entry_price": 27.46,
-      "entry_score": 76.0,
-      "current_price": 27.53,
-      "current_return": 0.25,
+      "name": "拓普集团",
+      "code": "601689",
+      "entry_date": "2026-05-08",
+      "entry_price": 66.89,
+      "entry_score": 72.0,
+      "current_price": 66.89,
+      "current_return": 0.0,
       "status": "holding",
-      "days": 2
+      "days": 0
     }
   ],
   "closed": [
@@ -25,11 +25,24 @@
       "days": 2,
       "exit_date": "2026-05-07",
       "exit_reason": "持有3天，自动平仓"
+    },
+    {
+      "name": "伊利股份",
+      "code": "600887",
+      "entry_date": "2026-04-30",
+      "entry_price": 27.46,
+      "entry_score": 76.0,
+      "current_price": 27.52,
+      "current_return": 0.22,
+      "status": "timeout",
+      "days": 2,
+      "exit_date": "2026-05-08",
+      "exit_reason": "持有3天，自动平仓"
     }
   ],
   "summary": {
-    "total_signals": 2,
-    "wins": 0,
-    "total_return": -1.43
+    "total_signals": 3,
+    "wins": 1,
+    "total_return": -1.21
   }
 }
