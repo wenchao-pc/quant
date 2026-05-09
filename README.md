@@ -81,6 +81,6 @@ git push hf master:main          # HuggingFace（Spaces 读 main 分支）
 
 ## 查看报告
 
-- HuggingFace: https://huggingface.co/spaces/kuo-zi/quant
-- ModelScope: http://www.modelscope.cn/studios/kuozi002/quant-report
+- HuggingFace: https://kuo-zi-quant.hf.space/
+- ModelScope: https://kuozi002-quant-report.ms.show
 - 本地: `file://~/.hermes/quant/quant-report/index.html`
