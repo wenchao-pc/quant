@@ -37,7 +37,7 @@ quant/                          ← 项目根目录
 ├── report-generator/           ← 报告生成模块
 │   ├── generate.py             ← cron 调用这个入口
 │   └── templates/              ← 3 套 HTML 模板（broker/social/hacker）
-└── quant-report/               ← 前端展示仓库（独立 git）
+└── quant-report/               ← 前端展示（主仓库子目录，随 master 一起推送）
      ├── index.html              ← 报告主页
      ├── reports/YYYY-MM-DD/     ← 每日报告
      └── data/tracking.json      ← 持仓追踪记录
