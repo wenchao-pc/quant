@@ -1,1 +1,5 @@
-ms_deploy.json
+__pycache__/
+*.pyc
+cache/
+*.csv
+.history
