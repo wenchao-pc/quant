@@ -85,14 +85,14 @@ def strategy_consecutive_up(df_hist):
             break
     
     score, info = 0, {}
-    if consec >= 4:
+    if consec >= 5:
+        score = 50; info['signal'] = f'连涨{consec}天(注意回调)'
+    elif consec == 4:
         score = 90; info['signal'] = f'连涨{consec}天(强势)'
     elif consec == 3:
         score = 70; info['signal'] = '连涨3天'
     elif consec == 2:
         score = 40; info['signal'] = '连涨2天'
-    if consec >= 5:
-        score = 50; info['signal'] += '(注意回调)'
     return score, info
 
 

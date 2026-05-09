@@ -10,80 +10,14 @@ from datetime import datetime, timedelta
 
 sys.path.insert(0, os.path.dirname(__file__))
 
-from data.fetcher import get_stock_history, get_all_stocks, fetch_tencent_batch
+from data.fetcher import get_stock_history, get_all_stocks
 import pandas as pd
 import numpy as np
+from main import (
+    calc_ma, strategy_ma_breakthrough, strategy_volume_price,
+    strategy_consecutive_up, strategy_support_bounce
+)
 
-
-# ============ 策略函数（和main.py保持一致） ============
-
-def calc_ma(series, n):
-    return series.rolling(window=n).mean()
-
-def strategy_ma_breakthrough(df_hist):
-    if len(df_hist) < 30: return 0, {}
-    close = df_hist['收盘']
-    ma5 = calc_ma(close, 5)
-    ma20 = calc_ma(close, 20)
-    if len(ma5) < 3: return 0, {}
-    prev_diff = ma5.iloc[-2] - ma20.iloc[-2]
-    curr_diff = ma5.iloc[-1] - ma20.iloc[-1]
-    score, info = 0, {}
-    if prev_diff < 0 and curr_diff > 0:
-        score = 80; info['signal'] = '金叉'
-    elif curr_diff > 0:
-        score = 40; info['signal'] = '多头排列'
-    else:
-        score = 0; info['signal'] = '空头'
-    if close.iloc[-1] > ma5.iloc[-1]: score += 10
-    return min(score, 100), info
-
-def strategy_volume_price(df_hist):
-    if len(df_hist) < 10: return 0, {}
-    close = df_hist['收盘']
-    volume = df_hist['成交量']
-    vol_recent = volume.iloc[-5:].mean()
-    vol_prev = volume.iloc[-10:-5].mean()
-    if vol_prev == 0: return 0, {}
-    vol_ratio = vol_recent / vol_prev
-    pct_5d = (close.iloc[-1] / close.iloc[-6] - 1) * 100
-    score, info = 0, {}
-    if vol_ratio > 1.5 and pct_5d > 3:
-        score = 80
-    elif vol_ratio > 1.2 and pct_5d > 0:
-        score = 50
-    elif vol_ratio < 0.8 and pct_5d > 2:
-        score = 30
-    return min(score, 100), info
-
-def strategy_consecutive_up(df_hist):
-    if len(df_hist) < 5: return 0, {}
-    close = df_hist['收盘']
-    changes = close.pct_change().iloc[-5:]
-    consec = 0
-    for i in range(len(changes)-1, -1, -1):
-        if changes.iloc[i] > 0: consec += 1
-        else: break
-    if consec >= 4: return 90, {}
-    elif consec == 3: return 70, {}
-    elif consec == 2: return 40, {}
-    return 0, {}
-
-def strategy_support_bounce(df_hist):
-    if len(df_hist) < 65: return 0, {}
-    close = df_hist['收盘']
-    ma60 = calc_ma(close, 60)
-    ma20 = calc_ma(close, 20)
-    curr_close = close.iloc[-1]
-    curr_ma60 = ma60.iloc[-1]
-    if curr_ma60 == 0: return 0, {}
-    ratio = (curr_close / curr_ma60 - 1) * 100
-    score = 0
-    if -3 < ratio < 2 and close.iloc[-1] > close.iloc[-2]:
-        score = 75
-    elif ratio > 2 and curr_close > ma20.iloc[-1]:
-        score = 50
-    return score, {}
 
 def analyze_stock_at_date(df_hist, end_idx):
     """在历史某个时间点分析股票（用end_idx截断数据）"""
@@ -202,34 +136,34 @@ def run_backtest(test_days=20, top_n=50, score_threshold=50):
             
             # 用这个日期之前的数据跑策略
             score = analyze_stock_at_date(df, df_idx)
-            
+
             if score is not None and score >= score_threshold:
                 # 记录当天价格
                 price_today = df.loc[df_idx, '收盘']
                 change_today = df.loc[df_idx, '涨跌幅'] if '涨跌幅' in df.columns else 0
-                
+
                 day_picks.append({
                     'code': code,
                     'name': info['name'],
                     'score': score,
                     'price': price_today,
                     'change_today': change_today,
-                    'df_idx': df_idx,
+                    'test_date': test_date,  # 用日期字符串而非整数索引
                 })
-        
+
         # 按得分排序取前5
         day_picks.sort(key=lambda x: x['score'], reverse=True)
         day_picks = day_picks[:5]
-        
+
         if not day_picks:
             continue
-        
-        # 计算后续收益
+
+        # 计算后续收益（用交易日历查找未来日期，避免非交易日跳跃问题）
         for pick in day_picks:
             df = stock_data[pick['code']]['df']
-            df_idx = pick['df_idx']
+            test_date = pick['test_date']
             buy_price = pick['price']
-            
+
             trade = {
                 'date': test_date,
                 'code': pick['code'],
@@ -238,17 +172,27 @@ def run_backtest(test_days=20, top_n=50, score_threshold=50):
                 'buy_price': buy_price,
                 'change_today': pick['change_today'],
             }
-            
-            # 计算1-5天后的收益
+
+            # 用 all_dates 查找未来第 N 个交易日
+            try:
+                test_day_idx = all_dates.index(test_date)
+            except ValueError:
+                continue
+
             for hold_days in [1, 2, 3, 5]:
-                future_idx = df_idx + hold_days
-                if future_idx < len(df):
-                    future_price = df.iloc[future_idx]['收盘']
-                    ret = (future_price / buy_price - 1) * 100
-                    trade[f'return_{hold_days}d'] = round(ret, 2)
+                future_day_idx = test_day_idx + hold_days
+                if future_day_idx < len(all_dates):
+                    future_date = all_dates[future_day_idx]
+                    date_mask = df['日期'] == future_date
+                    if date_mask.any():
+                        future_price = df.loc[date_mask, '收盘'].iloc[0]
+                        ret = (future_price / buy_price - 1) * 100
+                        trade[f'return_{hold_days}d'] = round(ret, 2)
+                    else:
+                        trade[f'return_{hold_days}d'] = None
                 else:
                     trade[f'return_{hold_days}d'] = None
-            
+
             all_trades.append(trade)
         
         picked_names = [p['name'] for p in day_picks[:3]]

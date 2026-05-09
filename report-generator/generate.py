@@ -90,7 +90,7 @@ def run_and_collect(top_n=80):
         'date': now.strftime('%Y-%m-%d'),
         'weekday': ['周一','周二','周三','周四','周五','周六','周日'][now.weekday()],
         'generated_at': now.strftime('%Y-%m-%d %H:%M:%S'),
-        'total_scanned': 4061,
+        'total_scanned': len(get_all_stocks()),
         'active_analyzed': top_n,
         'signal_count': len(results),
         'market': market,
