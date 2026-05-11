@@ -46,6 +46,15 @@ def run_and_collect(top_n=80):
     """跑选股并收集所有数据"""
     if not is_trading_day():
         return None
+    
+    # 清K线缓存，确保用最新数据
+    import glob
+    cache_files = glob.glob(os.path.join(QUANT_DIR, 'cache', 'hist_*.csv'))
+    for f in cache_files:
+        os.remove(f)
+    if cache_files:
+        print(f"  🗑️  清缓存: {len(cache_files)}个K线文件")
+    
     print("📊 运行选股分析...")
     results = run_daily_screening(top_n=top_n)
     
