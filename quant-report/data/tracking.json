@@ -12,17 +12,6 @@
       "days": 0
     },
     {
-      "name": "大位科技",
-      "code": "600589",
-      "entry_date": "2026-05-11",
-      "entry_price": 13.02,
-      "entry_score": 71.0,
-      "current_price": 13.02,
-      "current_return": 0.0,
-      "status": "holding",
-      "days": 0
-    },
-    {
       "name": "数据港",
       "code": "603881",
       "entry_date": "2026-05-11",
@@ -85,7 +74,7 @@
     }
   ],
   "summary": {
-    "total_signals": 7,
+    "total_signals": 6,
     "wins": 1,
     "total_return": -1.21
   }

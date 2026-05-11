@@ -204,6 +204,7 @@ def update_trading(data):
     date_str = data['date']
     
     # 添加新信号到active
+    today_codes = {sig['code'] for sig in data['signals']}
     for sig in data['signals']:
         # 检查是否已在active持仓中（去重核心：同一天+同日重复运行也防住）
         already_active = any(a['code'] == sig['code'] for a in tracking['active'])
@@ -224,6 +225,15 @@ def update_trading(data):
                 'days': 0
             })
             tracking['summary']['total_signals'] += 1
+    
+    # 移除已不在当天信号里的持仓（防止旧缓存错误信号混入）
+    kept = []
+    for pos in tracking['active']:
+        if pos['code'] not in today_codes:
+            print(f"  🗑️  {pos['name']}({pos['code']}) 已不在当日信号，移出追踪")
+        else:
+            kept.append(pos)
+    tracking['active'] = kept
     
     # 更新active持仓的当前价格和收益
     # （简化版：用当日数据，实际应该获取最新价）
