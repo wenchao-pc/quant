@@ -6,7 +6,29 @@
       "entry_date": "2026-05-08",
       "entry_price": 66.89,
       "entry_score": 72.0,
-      "current_price": 66.89,
+      "current_price": 66.96,
+      "current_return": 0.1,
+      "status": "holding",
+      "days": 1
+    },
+    {
+      "name": "蓝思科技",
+      "code": "300433",
+      "entry_date": "2026-05-11",
+      "entry_price": 30.82,
+      "entry_score": 84.8,
+      "current_price": 30.82,
+      "current_return": 0.0,
+      "status": "holding",
+      "days": 0
+    },
+    {
+      "name": "大位科技",
+      "code": "600589",
+      "entry_date": "2026-05-11",
+      "entry_price": 13.02,
+      "entry_score": 71.0,
+      "current_price": 13.02,
       "current_return": 0.0,
       "status": "holding",
       "days": 0
@@ -41,7 +63,7 @@
     }
   ],
   "summary": {
-    "total_signals": 3,
+    "total_signals": 5,
     "wins": 1,
     "total_return": -1.21
   }

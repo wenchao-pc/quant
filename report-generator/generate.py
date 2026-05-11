@@ -175,7 +175,7 @@ def get_trading_days_count(entry_date_str, today_str):
             return 0
         entry_idx = trading_days.index(entry_date_str)
         today_idx = trading_days.index(today_str)
-        # 持仓天数 = 今天索引 - 入场日索引（不含入场日当天）
+        # 持仓天数 = 今天索引 - 入场日索引（含入场日当天）
         count = today_idx - entry_idx
         return max(0, count)
     except Exception:

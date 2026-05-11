@@ -1,0 +1,9 @@
+# quant 项目依赖
+akshare>=1.12.0
+pandas>=2.0.0
+numpy>=1.24.0
+requests>=2.31.0
+
+# 测试框架
+pytest>=7.4.0
+pytest-mock>=3.12.0

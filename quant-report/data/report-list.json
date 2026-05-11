@@ -1,5 +1,11 @@
 [
   {
+    "date": "2026-05-11",
+    "weekday": "周一",
+    "signal_count": 2,
+    "total_scanned": 4465
+  },
+  {
     "date": "2026-05-08",
     "weekday": "周五",
     "signal_count": 1,
