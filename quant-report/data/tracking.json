@@ -1,17 +1,6 @@
 {
   "active": [
     {
-      "name": "拓普集团",
-      "code": "601689",
-      "entry_date": "2026-05-08",
-      "entry_price": 66.89,
-      "entry_score": 72.0,
-      "current_price": 66.96,
-      "current_return": 0.1,
-      "status": "holding",
-      "days": 1
-    },
-    {
       "name": "蓝思科技",
       "code": "300433",
       "entry_date": "2026-05-11",
@@ -32,6 +21,39 @@
       "current_return": 0.0,
       "status": "holding",
       "days": 0
+    },
+    {
+      "name": "数据港",
+      "code": "603881",
+      "entry_date": "2026-05-11",
+      "entry_price": 42.31,
+      "entry_score": 81.0,
+      "current_price": 42.31,
+      "current_return": 0.0,
+      "status": "holding",
+      "days": 0
+    },
+    {
+      "name": "烽火通信",
+      "code": "600498",
+      "entry_date": "2026-05-11",
+      "entry_price": 58.61,
+      "entry_score": 72.0,
+      "current_price": 58.61,
+      "current_return": 0.0,
+      "status": "holding",
+      "days": 0
+    },
+    {
+      "name": "拓普集团",
+      "code": "601689",
+      "entry_date": "2026-05-08",
+      "entry_price": 66.89,
+      "entry_score": 72.0,
+      "current_price": 66.96,
+      "current_return": 0.1,
+      "status": "holding",
+      "days": 1
     }
   ],
   "closed": [
@@ -63,7 +85,7 @@
     }
   ],
   "summary": {
-    "total_signals": 5,
+    "total_signals": 7,
     "wins": 1,
     "total_return": -1.21
   }

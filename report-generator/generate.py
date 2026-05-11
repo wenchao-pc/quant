@@ -280,6 +280,9 @@ def update_trading(data):
     
     tracking['active'] = still_active
     
+    # 按买入日期降序排序，最新的在前面
+    tracking['active'].sort(key=lambda x: x['entry_date'], reverse=True)
+    
     with open(tracking_path, 'w', encoding='utf-8') as f:
         json.dump(tracking, f, ensure_ascii=False, indent=2)
     print(f"✅ Tracking: {tracking_path}")
