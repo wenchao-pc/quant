@@ -206,11 +206,35 @@ def update_trading(data):
     # 添加新信号到active
     today_codes = {sig['code'] for sig in data['signals']}
     for sig in data['signals']:
-        # 检查是否已在active持仓中（去重核心：同一天+同日重复运行也防住）
-        already_active = any(a['code'] == sig['code'] for a in tracking['active'])
-        if already_active:
-            print(f"⏭️  {sig['name']}({sig['code']}) 已在持仓中，跳过")
+        # 检查是否已在active持仓中
+        existing = next((a for a in tracking['active'] if a['code'] == sig['code']), None)
+        if existing:
+            # 持仓期间再次触发信号：重置计时器 + 更新分数 + 记录历史
+            old_date = existing['entry_date']
+            old_score = existing['entry_score']
+            # 初始化信号历史
+            if 'signal_history' not in existing:
+                existing['signal_history'] = [{
+                    'date': existing['entry_date'],
+                    'score': existing['entry_score'],
+                    'price': existing['entry_price'],
+                    'action': '首次入场'
+                }]
+            # 追加本次触发记录
+            existing['signal_history'].append({
+                'date': date_str,
+                'score': sig['total_score'],
+                'price': sig['price'],
+                'action': '信号增强-重置计时'
+            })
+            # 重置入场日期（重新开始算3天）
+            existing['entry_date'] = date_str
+            existing['entry_score'] = sig['total_score']
+            existing['days'] = 0
+            tracking['summary']['total_signals'] += 1
+            print(f"🔄 {sig['name']}({sig['code']}) 信号增强: {old_score}→{sig['total_score']}分, 计时重置 ({old_date}→{date_str})")
             continue
+        # 全新信号，加入持仓
         exists = any(a['code'] == sig['code'] and a['entry_date'] == date_str for a in tracking['active'])
         if not exists:
             tracking['active'].append({
@@ -222,7 +246,13 @@ def update_trading(data):
                 'current_price': sig['price'],
                 'current_return': 0,
                 'status': 'holding',
-                'days': 0
+                'days': 0,
+                'signal_history': [{
+                    'date': date_str,
+                    'score': sig['total_score'],
+                    'price': sig['price'],
+                    'action': '首次入场'
+                }]
             })
             tracking['summary']['total_signals'] += 1
     
