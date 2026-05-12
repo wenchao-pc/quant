@@ -9,7 +9,7 @@
       "current_price": 59.01,
       "current_return": 0.68,
       "status": "holding",
-      "days": 1,
+      "days": 2,
       "signal_history": [
         {
           "date": "2026-05-11",
@@ -28,7 +28,7 @@
       "entry_price": 30.82,
       "current_price": 30.48,
       "current_return": -1.1,
-      "days": 1,
+      "days": 2,
       "signal_history": [
         {
           "date": "2026-05-11",
@@ -47,7 +47,7 @@
       "entry_price": 42.31,
       "current_price": 40.23,
       "current_return": -4.92,
-      "days": 1,
+      "days": 2,
       "signal_history": [
         {
           "date": "2026-05-11",
@@ -66,31 +66,12 @@
       "entry_price": 13.02,
       "current_price": 12.65,
       "current_return": -2.84,
-      "days": 1,
+      "days": 2,
       "signal_history": [
         {
           "date": "2026-05-11",
           "score": 71.0,
           "price": 13.02,
-          "action": "首次入场"
-        }
-      ]
-    },
-    {
-      "name": "拓普集团",
-      "code": "601689",
-      "entry_date": "2026-05-08",
-      "entry_score": 72.0,
-      "status": "holding",
-      "entry_price": 66.89,
-      "current_price": 67.05,
-      "current_return": 0.24,
-      "days": 2,
-      "signal_history": [
-        {
-          "date": "2026-05-08",
-          "score": 72.0,
-          "price": 66.89,
           "action": "首次入场"
         }
       ]
@@ -138,11 +119,32 @@
           "action": "首次入场"
         }
       ]
+    },
+    {
+      "name": "拓普集团",
+      "code": "601689",
+      "entry_date": "2026-05-08",
+      "entry_score": 72.0,
+      "status": "timeout",
+      "entry_price": 66.89,
+      "current_price": 67.05,
+      "current_return": 0.24,
+      "days": 2,
+      "signal_history": [
+        {
+          "date": "2026-05-08",
+          "score": 72.0,
+          "price": 66.89,
+          "action": "首次入场"
+        }
+      ],
+      "exit_date": "2026-05-13",
+      "exit_reason": "持有3天，自动平仓"
     }
   ],
   "summary": {
     "total_signals": 7,
-    "wins": 1,
-    "total_return": -1.21
+    "wins": 2,
+    "total_return": -0.97
   }
 }

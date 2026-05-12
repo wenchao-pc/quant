@@ -203,6 +203,16 @@ def update_trading(data):
     
     date_str = data['date']
     
+    # 兼容老数据：自动补全 signal_history
+    for pos in tracking['active'] + tracking['closed']:
+        if 'signal_history' not in pos:
+            pos['signal_history'] = [{
+                'date': pos['entry_date'],
+                'score': pos.get('entry_score', 0),
+                'price': pos.get('entry_price', 0),
+                'action': '首次入场'
+            }]
+    
     # 添加新信号到active
     today_codes = {sig['code'] for sig in data['signals']}
     for sig in data['signals']:
