@@ -20,39 +20,6 @@ from main import run_daily_screening, analyze_stock
 from data.fetcher import get_top_volume_stocks, get_all_stocks
 
 
-def get_report_date():
-    """获取报告应使用的日期。
-    - 今天是交易日且已收盘(15:05+) → 用今天
-    - 今天是交易日但未收盘 → 用上一交易日
-    - 今天非交易日 → 用最近的过去交易日
-    """
-    import akshare as ak
-    now = datetime.now()
-    today_str = now.strftime("%Y-%m-%d")
-    
-    df = ak.tool_trade_date_hist_sina()
-    trading_days = df["trade_date"].astype(str).tolist()
-    
-    # 今天是交易日且已过15:05 → 用今天
-    if today_str in trading_days and (now.hour > 15 or (now.hour == 15 and now.minute >= 5)):
-        return today_str
-    
-    # 未收盘或非交易日 → 找最近的过去交易日
-    # 如果今天是交易日但未开盘，应该用上一个交易日
-    past_days = [d for d in trading_days if d < today_str]
-    if today_str in trading_days and now.hour < 15:
-        # 今天是交易日但还没收盘，用上一个
-        pass
-    
-    if past_days:
-        last_trading_day = past_days[-1]
-        if last_trading_day != today_str:
-            print(f"⏭️ {today_str} 未收盘/非交易日，使用上一交易日 {last_trading_day}")
-        return last_trading_day
-    
-    return today_str
-
-
 def is_trading_day():
     """判断今天是否为A股交易日"""
     # 周末直接返回False
@@ -75,9 +42,24 @@ def is_trading_day():
         return True
 
 
-def run_and_collect(top_n=80):
-    """跑选股并收集所有数据"""
-    report_date = get_report_date()
+def run_and_collect(top_n=80, date_str=None):
+    """跑选股并收集所有数据。只在交易日运行。
+    date_str: 指定日期则优先用该日快照（收盘后首次运行生成快照，之后再跑结果一致）
+    """
+    # 只在交易日运行
+    if not is_trading_day():
+        return None
+    
+    # 确定报告日期
+    now = datetime.now()
+    today_str = now.strftime('%Y-%m-%d')
+    if date_str is None:
+        date_str = today_str
+    
+    # 未收盘不跑（没有快照的情况下，实时数据不完整）
+    if date_str == today_str and (now.hour < 15 or (now.hour == 15 and now.minute < 5)):
+        print(f"⏭️ 未收盘({now.strftime('%H:%M')})，等待15:05后运行")
+        return None
     
     # 清K线缓存，确保用最新数据
     import glob
@@ -88,11 +70,11 @@ def run_and_collect(top_n=80):
         print(f"  🗑️  清缓存: {len(cache_files)}个K线文件")
     
     print("📊 运行选股分析...")
-    results = run_daily_screening(top_n=top_n)
+    results = run_daily_screening(top_n=top_n, date_str=date_str)
     
     # 获取Top10（包括<70分的）
     import pandas as pd
-    all_stocks_df = get_top_volume_stocks(10)
+    all_stocks_df = get_top_volume_stocks(10, date_str=date_str)
     top10 = []
     for idx, row in all_stocks_df.iterrows():
         code = str(row['代码']).zfill(6)
@@ -126,14 +108,11 @@ def run_and_collect(top_n=80):
     # 获取大盘数据
     market = get_market_data()
     
-    # 用 report_date（未收盘/非交易日时自动回退到上一交易日）
-    from datetime import datetime as _dt
-    report_dt = _dt.strptime(report_date, '%Y-%m-%d')
     data = {
-        'date': report_date,
-        'weekday': ['周一','周二','周三','周四','周五','周六','周日'][report_dt.weekday()],
-        'generated_at': _dt.now().strftime('%Y-%m-%d %H:%M:%S'),
-        'total_scanned': len(get_all_stocks()),
+        'date': date_str,
+        'weekday': ['周一','周二','周三','周四','周五','周六','周日'][datetime.strptime(date_str, '%Y-%m-%d').weekday()],
+        'generated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        'total_scanned': len(get_all_stocks(date_str=date_str)),
         'active_analyzed': top_n,
         'signal_count': len(results),
         'market': market,

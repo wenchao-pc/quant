@@ -133,11 +133,24 @@ def fetch_tencent_batch(codes, batch_size=60):
     return pd.DataFrame(all_data)
 
 
-def get_all_stocks():
-    """获取全A股实时行情"""
+def get_all_stocks(date_str=None):
+    """获取全A股行情。如果指定date_str，优先读取该日期的快照缓存。
+    收盘后首次运行会生成快照，之后再跑同一日期直接读快照，结果一致。
+    """
+    # 如果指定了日期，优先找该日期的快照
+    if date_str:
+        snapshot = _cache_path(f'snapshot_{date_str}.csv')
+        if os.path.exists(snapshot):
+            df = pd.read_csv(snapshot)
+            print(f"  📦 使用日期快照 {date_str} ({len(df)}只)")
+            return df
+    
     cached = _load_cache('all_stocks_tencent.csv', max_age_hours=6)
     if cached is not None:
         print(f"  📦 使用缓存({len(cached)}只)")
+        # 如果指定了日期但没有快照，把当前缓存存为快照
+        if date_str:
+            _save_cache(f'snapshot_{date_str}.csv', cached)
         return cached
     
     # 先获取代码列表
@@ -164,6 +177,10 @@ def get_all_stocks():
     df = df.sort_values('成交额', ascending=False).reset_index(drop=True)
     
     _save_cache('all_stocks_tencent.csv', df)
+    # 同时存一份日期快照，保证同一天再跑结果一致
+    if date_str:
+        _save_cache(f'snapshot_{date_str}.csv', df)
+        print(f"  💾 已保存 {date_str} 快照 ({len(df)}只)")
     print(f"  ✅ 获取 {len(df)} 只活跃A股")
     return df
 
@@ -244,9 +261,9 @@ def get_stock_history(symbol, days=120):
     return pd.DataFrame()
 
 
-def get_top_volume_stocks(n=100):
+def get_top_volume_stocks(n=100, date_str=None):
     """获取成交额前N的活跃股"""
-    df = get_all_stocks()
+    df = get_all_stocks(date_str=date_str)
     if len(df) == 0:
         return df
     return df.head(n)

@@ -152,7 +152,7 @@ def analyze_stock(code, name, price, change_pct, turnover):
     }
 
 
-def run_daily_screening(top_n=80):
+def run_daily_screening(top_n=80, date_str=None):
     """每日选股主函数"""
     start_time = time.time()
     print(f"{'='*60}")
@@ -162,7 +162,7 @@ def run_daily_screening(top_n=80):
     
     # 1. 获取活跃股池
     print(f"\n🔍 获取成交额前{top_n}活跃股...")
-    df = get_top_volume_stocks(top_n)
+    df = get_top_volume_stocks(top_n, date_str=date_str)
     if len(df) == 0:
         print("❌ 无法获取行情数据")
         return []
