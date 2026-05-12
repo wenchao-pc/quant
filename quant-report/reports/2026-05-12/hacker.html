@@ -98,15 +98,17 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
 <span class="dim">[SCAN]</span> Strategy 3: Consecutive Rally ..... <span class="bright">DONE</span>
 <span class="dim">[SCAN]</span> Strategy 4: Support Bounce ........ <span class="bright">DONE</span>
 <span class="dim">[SCAN]</span> ─────────────────────────────────────────
-<span class="dim">[SCAN]</span> Results: <span class="yellow">1 signals &ge; 70</span> | <span class="bright">80 stocks scored</span>
+<span class="dim">[SCAN]</span> Results: <span class="yellow">0 signals &ge; 70</span> | <span class="bright">80 stocks scored</span>
 
   +-----------------------------------------+
   |                                         |
-  |   <span class="red">&#9889; 1 SIGNAL(S) DETECTED</span>              |
+  |   <span class="signal-safe">&#10003; CLEAR - NO ACTION REQUIRED</span>         |
   |                                         |
-  |   Top Signal: <span class="yellow">烽火通信 72pts</span>       |
-  |   Threshold:  70.0 pts                  |
-  |   Action:     <span class="red">MONITOR &amp; PREPARE</span>              |
+  |   Highest score: <span class="yellow">53.2</span> (紫金矿业)        |
+  |   Threshold:    70.0                    |
+  |   Gap:          16.8 pts                 |
+  |                                         |
+  |   <span class="dim">"不操作就是最好的操作"</span>              |
   |                                         |
   +-----------------------------------------+
 </pre>
@@ -115,35 +117,32 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
 <div class="box">
 <div class="box-title">&#9656; TOP 5 SCORES</div>
 <pre>
-<span class="white">华工科技 000988</span> |<span class="dim">████████████████████</span><span class="dim">░░░░░░░░░░░░░░░░░░░░</span> 50.0
-<span class="white">北方稀土 600111</span> |<span class="dim">██████████████████</span><span class="dim">░░░░░░░░░░░░░░░░░░░░░</span> 46.5
-<span class="white">中天科技 600522</span> |<span class="dim">██████████████████</span><span class="dim">░░░░░░░░░░░░░░░░░░░░░░</span> 45.0
-<span class="white">立讯精密 002475</span> |<span class="dim">██████████████████</span><span class="dim">░░░░░░░░░░░░░░░░░░░░░░</span> 45.0
-<span class="white">中国长城 000066</span> |<span class="dim">███████████████</span><span class="dim">░░░░░░░░░░░░░░░░░░░░░░░░░</span> 37.5
+<span class="white">紫金矿业 601899</span> |<span class="dim">█████████████████████</span><span class="dim">░░░░░░░░░░░░░░░░░░</span> 53.2
+<span class="white">中天科技 600522</span> |<span class="dim">████████████████████</span><span class="dim">░░░░░░░░░░░░░░░░░░░░</span> 50.0
+<span class="white">恒瑞医药 600276</span> |<span class="dim">███████████████████</span><span class="dim">░░░░░░░░░░░░░░░░░░░░</span> 48.2
+<span class="white">中国长城 000066</span> |<span class="dim">███████████████████</span><span class="dim">░░░░░░░░░░░░░░░░░░░░░</span> 47.5
+<span class="white">华工科技 000988</span> |<span class="dim">███████████████</span><span class="dim">░░░░░░░░░░░░░░░░░░░░░░░░░</span> 37.5
                  +──────────────────────────────────────────+
                  0        20        40        60      <span class="red">70 THRESHOLD</span>
 </pre>
 </div>
 
-<div class="box"><div class="box-title">&#9656; SIGNAL STOCKS</div>
-<table class="term-table"><tr><th>#</th><th>TICKER</th><th>NAME</th><th>SCORE</th><th>CHANGE</th><th>Vol(亿)</th><th>ACTION</th></tr>
-<tr><td>01</td><td>600498</td><td>烽火通信</td><td class="yellow">72.0</td><td class="red">+0.68%</td><td class="white">77.3</td><td class="red">BUY</td></tr>
-</table></div>
+
 
 <div class="box">
 <div class="box-title">&#9656; ACTIVE STOCKS TOP 10</div>
 <table class="term-table">
 <tr><th>#</th><th>TICKER</th><th>NAME</th><th>SCORE</th><th>CHANGE</th><th>Vol(亿)</th><th>STATUS</th></tr>
-<tr><td>01</td><td>600522</td><td>中天科技</td><td class="dim">45.0</td><td class="red">+0.50%</td><td class="white">189.6</td><td><span class="dim">WAIT</span></td></tr>
-<tr><td>02</td><td>000066</td><td>中国长城</td><td class="dim">37.5</td><td class="red">+8.38%</td><td class="white">170.8</td><td><span class="dim">WAIT</span></td></tr>
-<tr><td>03</td><td>002475</td><td>立讯精密</td><td class="dim">45.0</td><td class="red">+1.49%</td><td class="white">152.7</td><td><span class="dim">WAIT</span></td></tr>
-<tr><td>04</td><td>601899</td><td>紫金矿业</td><td class="dim">3.0</td><td class="red">+0.90%</td><td class="white">145.9</td><td><span class="dim">WAIT</span></td></tr>
-<tr><td>05</td><td>000988</td><td>华工科技</td><td class="dim">50.0</td><td class="bright">-2.30%</td><td class="white">144.6</td><td><span class="dim">WAIT</span></td></tr>
-<tr><td>06</td><td>600276</td><td>恒瑞医药</td><td class="dim">3.0</td><td class="red">+4.84%</td><td class="white">138.3</td><td><span class="dim">WAIT</span></td></tr>
+<tr><td>01</td><td>600522</td><td>中天科技</td><td class="dim">50.0</td><td class="red">+0.50%</td><td class="white">189.6</td><td><span class="dim">WAIT</span></td></tr>
+<tr><td>02</td><td>000066</td><td>中国长城</td><td class="dim">47.5</td><td class="red">+8.38%</td><td class="white">170.8</td><td><span class="dim">WAIT</span></td></tr>
+<tr><td>03</td><td>002475</td><td>立讯精密</td><td class="dim">35.0</td><td class="red">+1.49%</td><td class="white">152.7</td><td><span class="dim">WAIT</span></td></tr>
+<tr><td>04</td><td>601899</td><td>紫金矿业</td><td class="dim">53.2</td><td class="red">+0.90%</td><td class="white">145.9</td><td><span class="dim">WAIT</span></td></tr>
+<tr><td>05</td><td>000988</td><td>华工科技</td><td class="dim">37.5</td><td class="bright">-2.30%</td><td class="white">144.6</td><td><span class="dim">WAIT</span></td></tr>
+<tr><td>06</td><td>600276</td><td>恒瑞医药</td><td class="dim">48.2</td><td class="red">+4.84%</td><td class="white">138.3</td><td><span class="dim">WAIT</span></td></tr>
 <tr><td>07</td><td>601138</td><td>工业富联</td><td class="dim">22.5</td><td class="bright">-2.20%</td><td class="white">137.3</td><td><span class="dim">WAIT</span></td></tr>
 <tr><td>08</td><td>600487</td><td>亨通光电</td><td class="dim">22.5</td><td class="red">+0.15%</td><td class="white">135.2</td><td><span class="dim">WAIT</span></td></tr>
 <tr><td>09</td><td>300136</td><td>信维通信</td><td class="dim">22.5</td><td class="bright">-5.43%</td><td class="white">129.2</td><td><span class="dim">WAIT</span></td></tr>
-<tr><td>10</td><td>600111</td><td>北方稀土</td><td class="dim">46.5</td><td class="bright">-5.89%</td><td class="white">126.4</td><td><span class="dim">WAIT</span></td></tr>
+<tr><td>10</td><td>600111</td><td>北方稀土</td><td class="dim">34.5</td><td class="bright">-5.89%</td><td class="white">126.4</td><td><span class="dim">WAIT</span></td></tr>
 </table>
 </div>
 
@@ -180,8 +179,8 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
   NO_CHASE_LIMIT = true    <span class="dim"># 不追涨停</span>
 
 <span class="cmd">quant --today</span>
-  <span class="red">STATUS: SIGNAL DETECTED</span>
-  <span class="dim">→ 关注信号股，观察买入时机</span>
+  <span class="yellow">STATUS: CLEAR</span>
+  <span class="dim">→ 空仓观望，等待下一个信号</span>
   <span class="dim">→ 预计信号周期：1-2次/周</span>
 </pre>
 </div>
