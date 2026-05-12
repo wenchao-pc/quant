@@ -20,13 +20,6 @@ HEADERS = {
 # 腾讯行情API
 TENCENT_QUOTE_URL = 'https://qt.gtimg.cn/q='
 
-# 获取A股代码列表的备选方法
-AKSHARE_AVAILABLE = True
-try:
-    import akshare as ak
-except:
-    AKSHARE_AVAILABLE = False
-
 
 def _cache_path(name):
     return os.path.join(CACHE_DIR, name)
@@ -47,21 +40,7 @@ def _save_cache(name, df):
 
 
 def _get_stock_list():
-    """获取A股代码列表"""
-    # 方法1: 本地维护一个列表
-    # 方法2: 用akshare获取代码列表（只需要代码，不需要实时数据）
-    if AKSHARE_AVAILABLE:
-        try:
-            # 轻量级接口获取代码列表
-            import akshare as ak
-            df = ak.stock_info_a_code_name()
-            df = df[~df['code'].str.startswith(('4', '8', '9'))]
-            df = df[~df['name'].str.contains('ST|退|N', na=False)]
-            return df['code'].tolist()
-        except:
-            pass
-    
-    # 方法3: 硬编码获取热门股票
+    """获取A股代码列表（从腾讯全市场数据中提取）"""
     return None
 
 
@@ -149,7 +128,7 @@ def get_all_stocks(date_str=None):
         from datetime import datetime
         today = datetime.now().strftime('%Y-%m-%d')
         if date_str != today:
-            print(f"  ⚠️ {date_str} 无快照数据，降级方案：用当前排名 + akshare历史K线")
+            print(f"  ⚠️ {date_str} 无快照数据，降级方案：用当前排名 + baostock历史K线")
             # 降级：用当前API拿全市场数据（排名可能不准），标记为降级
             df = _fetch_all_from_api()
             if len(df) > 0:
@@ -221,11 +200,10 @@ def _generate_stock_codes():
 
 
 def get_stock_history(symbol, days=120, date_str=None):
-    """获取个股日K线。date_str指定时，用akshare查到该日期为止的历史数据。"""
+    """获取个股日K线。baostock主力，搜狐降级。"""
     cache_name = f'hist_{symbol}.csv'
     cached = _load_cache(cache_name, max_age_hours=12)
     if cached is not None and len(cached) > 20:
-        # 如果指定了日期，截断到该日期
         if date_str:
             truncated = _truncate_to_date(cached, date_str)
             if len(truncated) > 20:
@@ -233,37 +211,45 @@ def get_stock_history(symbol, days=120, date_str=None):
         else:
             return cached
     
-    # 如果指定了历史日期，优先用akshare（支持精确日期范围）
-    if date_str and AKSHARE_AVAILABLE:
-        try:
-            import akshare as ak
-            end_date = date_str.replace('-', '')
-            start_date = (datetime.strptime(date_str, '%Y-%m-%d') - timedelta(days=days)).strftime('%Y%m%d')
-            df = ak.stock_zh_a_hist(symbol=symbol, period="daily",
-                                     start_date=start_date, end_date=end_date, adjust="qfq")
-            if len(df) > 10:
-                _save_cache(cache_name, df)
-                return df
-        except Exception as e:
-            print(f"  ⚠️ akshare历史查询失败 {symbol}: {e}")
-    
-    # 重试akshare（带延迟重试）
-    if AKSHARE_AVAILABLE:
-        try:
-            import akshare as ak
-            import time
-            time.sleep(0.3)
-            end_date = datetime.now().strftime('%Y%m%d')
-            start_date = (datetime.now() - timedelta(days=days)).strftime('%Y%m%d')
-            df = ak.stock_zh_a_hist(symbol=symbol, period="daily",
-                                     start_date=start_date, end_date=end_date, adjust="qfq")
-            if len(df) > 10:
+    # 主力: baostock
+    try:
+        import baostock as bs
+        lg = bs.login()
+        if lg.error_code == '0':
+            prefix = 'sh' if symbol.startswith('6') else 'sz'
+            end_d = date_str if date_str else datetime.now().strftime('%Y-%m-%d')
+            start_d = (datetime.strptime(end_d, '%Y-%m-%d') - timedelta(days=180)).strftime('%Y-%m-%d')
+            rs = bs.query_history_k_data_plus(
+                f"{prefix}.{symbol}",
+                "date,open,high,low,close,preclose,volume,amount,turn,pctChg",
+                start_date=start_d, end_date=end_d,
+                frequency="d", adjustflag="2")
+            rows = []
+            while (rs.error_code == '0') and rs.next():
+                row = rs.get_row_data()
+                if row[6]:  # volume不为空
+                    rows.append({
+                        '日期': row[0],
+                        '开盘': float(row[1]),
+                        '收盘': float(row[4]),
+                        '最高': float(row[2]),
+                        '最低': float(row[3]),
+                        '涨跌额': float(row[4]) - float(row[5]) if row[5] else 0,
+                        '涨跌幅': float(row[9]) if row[9] else 0,
+                        '成交量': float(row[6]),
+                        '成交额': float(row[7]) if row[7] else 0,
+                        '换手率': float(row[8]) if row[8] else 0,
+                        '振幅': ((float(row[2]) - float(row[3])) / float(row[5]) * 100) if row[5] and float(row[5]) > 0 else 0,
+                    })
+            bs.logout()
+            if len(rows) > 10:
+                df = pd.DataFrame(rows)
                 _save_cache(cache_name, df)
                 return _truncate_to_date(df, date_str)
-        except:
-            pass
+    except Exception as e:
+        print(f"  ⚠️ baostock查询失败 {symbol}: {e}")
 
-    # 降级: 搜狐财经K线（数据完整: 成交额+换手率）
+    # 降级: 搜狐财经K线
     try:
         prefix = 'cn_' + symbol
         end_d = date_str.replace('-', '') if date_str else datetime.now().strftime('%Y%m%d')
@@ -277,9 +263,9 @@ def get_stock_history(symbol, days=120, date_str=None):
                 hq = data[0]['hq']
                 if len(hq) > 10:
                     rows = []
-                    for item in reversed(hq):  # 搜狐是倒序，改为正序
+                    for item in reversed(hq):
                         pct_str = item[4].replace('%', '')
-                        turnover_wan = float(item[8]) * 10000  # 万元 → 元
+                        turnover_wan = float(item[8]) * 10000
                         rows.append({
                             '日期': item[0],
                             '开盘': float(item[1]),

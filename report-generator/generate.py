@@ -27,14 +27,20 @@ def is_trading_day():
     if weekday >= 5:
         print("⏭️ 周末休市，跳过")
         return False
-    # 用AKShare获取交易日历
+    # 用baostock获取交易日历
     try:
-        import akshare as ak
+        import baostock as bs
+        lg = bs.login()
         today = datetime.now().strftime("%Y-%m-%d")
-        df = ak.tool_trade_date_hist_sina()
-        trading_days = df["trade_date"].astype(str).tolist()
-        if today not in trading_days:
-            print(f"⏭️ {datetime.now().strftime('%Y-%m-%d')} 非交易日，跳过")
+        rs = bs.query_trade_dates(start_date=today, end_date=today)
+        is_trading = False
+        while (rs.error_code == '0') and rs.next():
+            row = rs.get_row_data()
+            if row[1] == '1':
+                is_trading = True
+        bs.logout()
+        if not is_trading:
+            print(f"⏭️ {today} 非交易日，跳过")
             return False
         return True
     except Exception as e:
@@ -189,16 +195,15 @@ def save_json(data):
 def get_trading_days_count(entry_date_str, today_str):
     """计算两个日期之间有多少个交易日后（不含入场日，含今天）"""
     try:
-        import akshare as ak
-        df = ak.tool_trade_date_hist_sina()
-        trading_days = df["trade_date"].astype(str).tolist()
-        # 交易日历中找入场日和今天的索引
-        if entry_date_str not in trading_days or today_str not in trading_days:
-            return 0
-        entry_idx = trading_days.index(entry_date_str)
-        today_idx = trading_days.index(today_str)
-        # 持仓天数 = 今天索引 - 入场日索引（含入场日当天）
-        count = today_idx - entry_idx
+        import baostock as bs
+        lg = bs.login()
+        rs = bs.query_trade_dates(start_date=entry_date_str, end_date=today_str)
+        count = 0
+        while (rs.error_code == '0') and rs.next():
+            row = rs.get_row_data()
+            if row[1] == '1' and row[0] != entry_date_str:
+                count += 1
+        bs.logout()
         return max(0, count)
     except Exception:
         return 0
