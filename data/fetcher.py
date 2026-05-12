@@ -136,6 +136,7 @@ def fetch_tencent_batch(codes, batch_size=60):
 def get_all_stocks(date_str=None):
     """获取全A股行情。如果指定date_str，优先读取该日期的快照缓存。
     收盘后首次运行会生成快照，之后再跑同一日期直接读快照，结果一致。
+    没有快照的历史日期无法获取数据，会报错退出。
     """
     # 如果指定了日期，优先找该日期的快照
     if date_str:
@@ -144,11 +145,17 @@ def get_all_stocks(date_str=None):
             df = pd.read_csv(snapshot)
             print(f"  📦 使用日期快照 {date_str} ({len(df)}只)")
             return df
+        # 没有快照，检查是不是今天（今天还可以从API拿）
+        from datetime import datetime
+        today = datetime.now().strftime('%Y-%m-%d')
+        if date_str != today:
+            print(f"  ❌ {date_str} 无快照数据，历史交易日无法回放")
+            return pd.DataFrame()
     
     cached = _load_cache('all_stocks_tencent.csv', max_age_hours=6)
     if cached is not None:
         print(f"  📦 使用缓存({len(cached)}只)")
-        # 如果指定了日期但没有快照，把当前缓存存为快照
+        # 如果指定了日期（=今天），把当前缓存存为快照
         if date_str:
             _save_cache(f'snapshot_{date_str}.csv', cached)
         return cached
