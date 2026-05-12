@@ -37,6 +37,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;backg
 .stat-item .val.blue{color:#00d4ff}
 .stat-item .val.yellow{color:#ffd740}
 .stat-item .val.pink{color:#f093fb}
+.stat-item .val.up{color:#ff5252}
+.stat-item .val.down{color:#00e676}
 .stat-item .label{font-size:10px;color:rgba(255,255,255,.3);margin-top:6px}
 
 /* 信号追踪 */
@@ -376,7 +378,7 @@ async function loadTracking() {
                 const avgEl = document.getElementById('stat-avgreturn');
                 if (avgEl) {
                     avgEl.textContent = (avgRet >= 0 ? '+' : '') + avgRet + '%';
-                    avgEl.className = 'val ' + (avgRet >= 0 ? 'green' : 'red');
+                    avgEl.className = 'val ' + (avgRet >= 0 ? 'up' : 'down');
                 }
                 
                 // 最大回撤（最差一笔的收益）
