@@ -251,6 +251,8 @@ def get_stock_history(symbol, days=120, date_str=None):
     if AKSHARE_AVAILABLE:
         try:
             import akshare as ak
+            import time
+            time.sleep(0.3)
             end_date = datetime.now().strftime('%Y%m%d')
             start_date = (datetime.now() - timedelta(days=days)).strftime('%Y%m%d')
             df = ak.stock_zh_a_hist(symbol=symbol, period="daily",
@@ -260,7 +262,43 @@ def get_stock_history(symbol, days=120, date_str=None):
                 return _truncate_to_date(df, date_str)
         except:
             pass
-    
+
+    # 降级: 搜狐财经K线（数据完整: 成交额+换手率）
+    try:
+        prefix = 'cn_' + symbol
+        end_d = date_str.replace('-', '') if date_str else datetime.now().strftime('%Y%m%d')
+        start_d = (datetime.strptime(end_d, '%Y%m%d') - timedelta(days=days)).strftime('%Y%m%d')
+        url = f'https://q.stock.sohu.com/hisHq?code={prefix}&start={start_d}&end={end_d}&stat=1&order=D&period=d&callback='
+        r = requests.get(url, headers=HEADERS, timeout=10)
+        if r.status_code == 200 and '[' in r.text:
+            import json as _json
+            data = _json.loads(r.text)
+            if data and len(data) > 0 and 'hq' in data[0]:
+                hq = data[0]['hq']
+                if len(hq) > 10:
+                    rows = []
+                    for item in reversed(hq):  # 搜狐是倒序，改为正序
+                        pct_str = item[4].replace('%', '')
+                        turnover_wan = float(item[8]) * 10000  # 万元 → 元
+                        rows.append({
+                            '日期': item[0],
+                            '开盘': float(item[1]),
+                            '收盘': float(item[2]),
+                            '涨跌额': float(item[3]),
+                            '涨跌幅': float(pct_str),
+                            '最低': float(item[5]),
+                            '最高': float(item[6]),
+                            '成交量': float(item[7]),
+                            '成交额': turnover_wan,
+                            '换手率': float(item[9].replace('%', '')),
+                            '振幅': 0,
+                        })
+                    df = pd.DataFrame(rows)
+                    _save_cache(cache_name, df)
+                    return _truncate_to_date(df, date_str)
+    except Exception as e:
+        print(f"  ⚠️ 搜狐K线查询失败 {symbol}: {e}")
+
     return pd.DataFrame()
 
 
