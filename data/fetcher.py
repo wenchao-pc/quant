@@ -247,41 +247,7 @@ def get_stock_history(symbol, days=120, date_str=None):
         except Exception as e:
             print(f"  ⚠️ akshare历史查询失败 {symbol}: {e}")
     
-    # 方法1: 新浪日K线API（最稳定）
-    try:
-        prefix = 'sh' if symbol.startswith('6') else 'sz'
-        url = f'https://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.getKLineData?symbol={prefix}{symbol}&scale=240&ma=no&datalen={days}'
-        r = requests.get(url, headers=HEADERS, timeout=10)
-        if r.status_code == 200 and '[' in r.text:
-            import json as _json
-            data = _json.loads(r.text)
-            if data and len(data) > 10:
-                rows = []
-                prev_close = None
-                for d in data:
-                    close = float(d['close'])
-                    pct = ((close / prev_close) - 1) * 100 if prev_close else 0
-                    rows.append({
-                        '日期': d['day'],
-                        '开盘': float(d['open']),
-                        '收盘': close,
-                        '最高': float(d['high']),
-                        '最低': float(d['low']),
-                        '成交量': float(d['volume']),
-                        '成交额': 0,
-                        '振幅': 0,
-                        '涨跌幅': pct,
-                        '涨跌额': 0,
-                        '换手率': 0,
-                    })
-                    prev_close = close
-                df = pd.DataFrame(rows)
-                _save_cache(cache_name, df)
-                return _truncate_to_date(df, date_str)
-    except Exception as e:
-        pass
-    
-    # 方法2: AKShare（备用）
+    # 重试akshare（带延迟重试）
     if AKSHARE_AVAILABLE:
         try:
             import akshare as ak
