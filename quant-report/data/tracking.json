@@ -9,7 +9,7 @@
       "current_price": 59.01,
       "current_return": 0.68,
       "status": "holding",
-      "days": 0,
+      "days": 1,
       "signal_history": [
         {
           "date": "2026-05-11",
@@ -34,7 +34,7 @@
       "entry_price": 30.82,
       "current_price": 30.48,
       "current_return": -1.1,
-      "days": 1,
+      "days": 2,
       "signal_history": [
         {
           "date": "2026-05-11",
@@ -53,7 +53,7 @@
       "entry_price": 42.31,
       "current_price": 40.23,
       "current_return": -4.92,
-      "days": 1,
+      "days": 2,
       "signal_history": [
         {
           "date": "2026-05-11",
@@ -72,7 +72,7 @@
       "entry_price": 13.02,
       "current_price": 12.65,
       "current_return": -2.84,
-      "days": 1,
+      "days": 2,
       "signal_history": [
         {
           "date": "2026-05-11",
