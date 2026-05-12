@@ -149,8 +149,12 @@ def get_all_stocks(date_str=None):
         from datetime import datetime
         today = datetime.now().strftime('%Y-%m-%d')
         if date_str != today:
-            print(f"  ❌ {date_str} 无快照数据，历史交易日无法回放")
-            return pd.DataFrame()
+            print(f"  ⚠️ {date_str} 无快照数据，降级方案：用当前排名 + akshare历史K线")
+            # 降级：用当前API拿全市场数据（排名可能不准），标记为降级
+            df = _fetch_all_from_api()
+            if len(df) > 0:
+                df['数据降级'] = True
+            return df
     
     cached = _load_cache('all_stocks_tencent.csv', max_age_hours=6)
     if cached is not None:
@@ -161,11 +165,24 @@ def get_all_stocks(date_str=None):
         return cached
     
     # 先获取代码列表
+    df = _fetch_all_from_api()
+    if len(df) == 0:
+        return df
+    # 存缓存和快照
+    _save_cache('all_stocks_tencent.csv', df)
+    if date_str:
+        _save_cache(f'snapshot_{date_str}.csv', df)
+        print(f"  💾 已保存 {date_str} 快照 ({len(df)}只)")
+    print(f"  ✅ 获取 {len(df)} 只活跃A股")
+    return df
+
+
+def _fetch_all_from_api():
+    """从腾讯API获取全市场数据（不含缓存逻辑，纯API调用）"""
     print("  🌐 获取A股代码列表...")
     codes = _get_stock_list()
     
     if codes is None or len(codes) == 0:
-        # 备选：直接用已知的热门代码 + ETF代码段扫描
         print("  🔄 使用备选代码列表...")
         codes = _generate_stock_codes()
     
@@ -182,13 +199,6 @@ def get_all_stocks(date_str=None):
     df = df[~df['名称'].str.contains('ST|退|N', na=False)]
     df = df[df['成交额'] > 5e7]  # 5000万以上
     df = df.sort_values('成交额', ascending=False).reset_index(drop=True)
-    
-    _save_cache('all_stocks_tencent.csv', df)
-    # 同时存一份日期快照，保证同一天再跑结果一致
-    if date_str:
-        _save_cache(f'snapshot_{date_str}.csv', df)
-        print(f"  💾 已保存 {date_str} 快照 ({len(df)}只)")
-    print(f"  ✅ 获取 {len(df)} 只活跃A股")
     return df
 
 
@@ -210,12 +220,32 @@ def _generate_stock_codes():
     return codes
 
 
-def get_stock_history(symbol, days=120):
-    """获取个股日K线（新浪API为主）"""
+def get_stock_history(symbol, days=120, date_str=None):
+    """获取个股日K线。date_str指定时，用akshare查到该日期为止的历史数据。"""
     cache_name = f'hist_{symbol}.csv'
     cached = _load_cache(cache_name, max_age_hours=12)
     if cached is not None and len(cached) > 20:
-        return cached
+        # 如果指定了日期，截断到该日期
+        if date_str:
+            truncated = _truncate_to_date(cached, date_str)
+            if len(truncated) > 20:
+                return truncated
+        else:
+            return cached
+    
+    # 如果指定了历史日期，优先用akshare（支持精确日期范围）
+    if date_str and AKSHARE_AVAILABLE:
+        try:
+            import akshare as ak
+            end_date = date_str.replace('-', '')
+            start_date = (datetime.strptime(date_str, '%Y-%m-%d') - timedelta(days=days)).strftime('%Y%m%d')
+            df = ak.stock_zh_a_hist(symbol=symbol, period="daily",
+                                     start_date=start_date, end_date=end_date, adjust="qfq")
+            if len(df) > 10:
+                _save_cache(cache_name, df)
+                return df
+        except Exception as e:
+            print(f"  ⚠️ akshare历史查询失败 {symbol}: {e}")
     
     # 方法1: 新浪日K线API（最稳定）
     try:
@@ -247,7 +277,7 @@ def get_stock_history(symbol, days=120):
                     prev_close = close
                 df = pd.DataFrame(rows)
                 _save_cache(cache_name, df)
-                return df
+                return _truncate_to_date(df, date_str)
     except Exception as e:
         pass
     
@@ -261,12 +291,18 @@ def get_stock_history(symbol, days=120):
                                      start_date=start_date, end_date=end_date, adjust="qfq")
             if len(df) > 10:
                 _save_cache(cache_name, df)
-                return df
+                return _truncate_to_date(df, date_str)
         except:
             pass
     
     return pd.DataFrame()
 
+
+def _truncate_to_date(df, date_str):
+    """将K线数据截断到指定日期（含），确保不会用到未来数据"""
+    if date_str and '日期' in df.columns:
+        df = df[df['日期'] <= date_str].copy()
+    return df
 
 def get_top_volume_stocks(n=100, date_str=None):
     """获取成交额前N的活跃股"""

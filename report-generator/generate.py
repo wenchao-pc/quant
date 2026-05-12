@@ -89,7 +89,7 @@ def run_and_collect(top_n=80, date_str=None):
             top10.append(found)
         else:
             try:
-                r = analyze_stock(code, name, price, change_pct, turnover)
+                r = analyze_stock(code, name, price, change_pct, turnover, date_str=date_str)
                 if r:
                     top10.append(r)
                 else:

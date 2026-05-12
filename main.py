@@ -118,9 +118,9 @@ def strategy_support_bounce(df_hist):
     return score, info
 
 
-def analyze_stock(code, name, price, change_pct, turnover):
+def analyze_stock(code, name, price, change_pct, turnover, date_str=None):
     """对单只股票运行所有策略"""
-    df_hist = get_stock_history(code)
+    df_hist = get_stock_history(code, date_str=date_str)
     if len(df_hist) < 30:
         return None
     
@@ -182,7 +182,7 @@ def run_daily_screening(top_n=80, date_str=None):
         print(f"  [{idx+1}/{total}] 分析 {name}({code})...", end='')
         
         try:
-            result = analyze_stock(code, name, price, change_pct, turnover)
+            result = analyze_stock(code, name, price, change_pct, turnover, date_str=date_str)
             if result and result['total_score'] >= 70:
                 results.append(result)
                 print(f" ✅ 得分:{result['total_score']}")
