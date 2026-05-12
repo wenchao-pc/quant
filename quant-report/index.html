@@ -356,12 +356,46 @@ async function loadTracking() {
         
         list.innerHTML = html;
         
-        // 更新统计
+        // 更新统计（从实盘追踪数据计算）
         if (tracking.summary) {
             const s = tracking.summary;
-            if (s.total_signals > 0) {
-                const wr = ((s.wins / s.total_signals) * 100).toFixed(1);
+            const closed = tracking.closed || [];
+            const totalSignals = s.total_signals || 0;
+            const wins = s.wins || 0;
+            
+            if (totalSignals > 0) {
+                // 信号胜率
+                const wr = ((wins / totalSignals) * 100).toFixed(1);
                 document.getElementById('stat-winrate').textContent = wr + '%';
+            }
+            
+            if (closed.length > 0) {
+                // 平均每笔收益
+                const returns = closed.map(c => c.current_return || 0);
+                const avgRet = (returns.reduce((a,b) => a+b, 0) / returns.length).toFixed(2);
+                const avgEl = document.getElementById('stat-avgreturn');
+                if (avgEl) {
+                    avgEl.textContent = (avgRet >= 0 ? '+' : '') + avgRet + '%';
+                    avgEl.className = 'val ' + (avgRet >= 0 ? 'green' : 'red');
+                }
+                
+                // 最大回撤（最差一笔的收益）
+                const worst = Math.min(...returns).toFixed(2);
+                const ddEl = document.getElementById('stat-drawdown');
+                if (ddEl) {
+                    ddEl.textContent = worst + '%';
+                    ddEl.className = 'val red';
+                }
+                
+                // 夏普比率（简化：平均收益 / 收益标准差）
+                if (returns.length >= 2) {
+                    const mean = returns.reduce((a,b) => a+b, 0) / returns.length;
+                    const variance = returns.reduce((a,b) => a + Math.pow(b - mean, 2), 0) / (returns.length - 1);
+                    const std = Math.sqrt(variance);
+                    const sharpe = std > 0 ? (mean / std).toFixed(2) : '0.00';
+                    const shEl = document.getElementById('stat-sharpe');
+                    if (shEl) shEl.textContent = sharpe;
+                }
             }
         }
         
