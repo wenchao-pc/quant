@@ -78,13 +78,6 @@ def is_trading_day():
 def run_and_collect(top_n=80):
     """跑选股并收集所有数据"""
     report_date = get_report_date()
-    now = datetime.now()
-    # 如果报告日期不是今天（未收盘或非交易日），检查该日期报告是否已存在
-    if report_date != now.strftime('%Y-%m-%d'):
-        existing = os.path.join(REPORT_DIR, 'reports', report_date, 'data.json')
-        if os.path.exists(existing):
-            print(f"⏭️ {report_date} 报告已存在，跳过重复生成")
-            return None
     
     # 清K线缓存，确保用最新数据
     import glob
