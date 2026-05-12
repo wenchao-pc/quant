@@ -226,14 +226,8 @@ def update_trading(data):
             })
             tracking['summary']['total_signals'] += 1
     
-    # 移除已不在当天信号里的持仓（防止旧缓存错误信号混入）
-    kept = []
-    for pos in tracking['active']:
-        if pos['code'] not in today_codes:
-            print(f"  🗑️  {pos['name']}({pos['code']}) 已不在当日信号，移出追踪")
-        else:
-            kept.append(pos)
-    tracking['active'] = kept
+    # 注意：不移除旧持仓！持仓股票在持有期间分数会波动回落，不再触发信号是正常的
+    # 只有超时平仓逻辑（下面）才会移出追踪
     
     # 更新active持仓的当前价格和收益
     # （简化版：用当日数据，实际应该获取最新价）

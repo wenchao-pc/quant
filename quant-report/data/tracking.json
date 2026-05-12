@@ -10,6 +10,50 @@
       "current_return": 0.68,
       "status": "holding",
       "days": 1
+    },
+    {
+      "name": "蓝思科技",
+      "code": "300433",
+      "entry_date": "2026-05-11",
+      "entry_score": 84.8,
+      "status": "holding",
+      "entry_price": 30.82,
+      "current_price": 30.48,
+      "current_return": -1.1,
+      "days": 1
+    },
+    {
+      "name": "数据港",
+      "code": "603881",
+      "entry_date": "2026-05-11",
+      "entry_score": 81.0,
+      "status": "holding",
+      "entry_price": 42.31,
+      "current_price": 40.23,
+      "current_return": -4.92,
+      "days": 1
+    },
+    {
+      "name": "大位科技",
+      "code": "600589",
+      "entry_date": "2026-05-11",
+      "entry_score": 71.0,
+      "status": "holding",
+      "entry_price": 13.02,
+      "current_price": 12.65,
+      "current_return": -2.84,
+      "days": 1
+    },
+    {
+      "name": "拓普集团",
+      "code": "601689",
+      "entry_date": "2026-05-08",
+      "entry_score": 72.0,
+      "status": "holding",
+      "entry_price": 66.89,
+      "current_price": 67.05,
+      "current_return": 0.24,
+      "days": 2
     }
   ],
   "closed": [
@@ -41,7 +85,7 @@
     }
   ],
   "summary": {
-    "total_signals": 6,
+    "total_signals": 7,
     "wins": 1,
     "total_return": -1.21
   }
