@@ -396,6 +396,7 @@ def get_all_reports():
                 'weekday': d.get('weekday', ''),
                 'signal_count': d.get('signal_count', 0),
                 'total_scanned': d.get('total_scanned', 0),
+                'generated_at': d.get('generated_at', ''),
             })
     return reports
 

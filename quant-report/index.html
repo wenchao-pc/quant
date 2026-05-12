@@ -26,6 +26,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;backg
 .today-info .signal-text.yellow{color:#ffd740}
 .today-info .signal-text.red{color:#ff5252}
 .today-info .date-text{font-size:12px;color:rgba(255,255,255,.3);margin-top:4px}
+.today-info .gen-time{font-size:11px;color:rgba(255,255,255,.18);margin-top:2px}
 
 /* 统计卡 */
 .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0}
@@ -123,6 +124,7 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
 <div class="today-info">
 <div class="signal-text green" id="today-signal">加载中...</div>
 <div class="date-text" id="today-date"></div>
+<div class="gen-time" id="gen-time"></div>
 </div>
 </div>
 </div>
@@ -226,6 +228,12 @@ async function loadReportList() {
             todaySignal.className = 'signal-text yellow';
         }
         todayDate.textContent = `${latest.date} ${latest.weekday} · 扫描${latest.total_scanned}只`;
+        
+        // 显示生成时间
+        const genTime = document.getElementById('gen-time');
+        if (genTime && latest.generated_at) {
+            genTime.textContent = `最后更新: ${latest.generated_at}`;
+        }
         
         // 渲染报告列表
         let html = '';
