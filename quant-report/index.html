@@ -51,6 +51,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;backg
 .track-right .status{font-size:10px;color:rgba(255,255,255,.25);text-align:right;margin-top:2px}
 .track-empty{text-align:center;padding:20px;color:rgba(255,255,255,.2);font-size:13px}
 
+/* 信号增强标签 */
+.boost-tag{font-size:10px;background:linear-gradient(135deg,#f093fb,#f5576c);color:#fff;padding:2px 8px;border-radius:10px;margin-left:6px;vertical-align:middle}
+
+/* 信号时间线 */
+.signal-timeline{display:none;margin-top:8px;padding:8px 12px;background:rgba(255,255,255,.03);border-radius:10px;border-left:2px solid rgba(240,147,251,.3)}
+.signal-timeline.show{display:block}
+.timeline-item{display:flex;align-items:center;gap:8px;padding:3px 0;font-size:11px;color:rgba(255,255,255,.4)}
+.timeline-item.boost{color:rgba(240,147,251,.8)}
+.tl-icon{width:16px;text-align:center}
+.tl-date{min-width:80px}
+.tl-score{min-width:45px}
+.tl-price{color:rgba(255,255,255,.25)}
+
 /* 历史报告 */
 .section-label{font-size:14px;color:rgba(255,255,255,.4);margin:24px 0 12px;padding-left:4px;display:flex;justify-content:space-between;align-items:center}
 .section-label a{font-size:11px;color:rgba(255,255,255,.2);text-decoration:none}
@@ -250,10 +263,32 @@ async function loadTracking() {
                 const ret = (t.current_return || 0);
                 const cls = ret >= 0 ? 'up' : 'down';
                 const days = t.days || 0;
-                html += `<div class="track-item">
+                const hist = t.signal_history || [];
+                const boostCount = hist.filter(h => h.action && h.action.includes('增强')).length;
+                const boostTag = boostCount > 0 ? `<span class="boost-tag">🔄 信号增强×${boostCount}</span>` : '';
+                
+                let histHtml = '';
+                if (hist.length > 1) {
+                    histHtml = '<div class="signal-timeline">';
+                    hist.forEach(h => {
+                        const isBoost = h.action && h.action.includes('增强');
+                        const icon = isBoost ? '🔄' : '🎯';
+                        const scoreChange = isBoost ? '' : '';
+                        histHtml += `<div class="timeline-item ${isBoost ? 'boost' : 'entry'}">
+                            <span class="tl-icon">${icon}</span>
+                            <span class="tl-date">${h.date}</span>
+                            <span class="tl-score">${h.score}分</span>
+                            <span class="tl-price">¥${h.price}</span>
+                        </div>`;
+                    });
+                    histHtml += '</div>';
+                }
+                
+                html += `<div class="track-item" onclick="this.querySelector('.signal-timeline')?.classList.toggle('show')">
                     <div class="track-left">
-                        <div class="name">📊 ${t.name} (${t.code})</div>
-                        <div class="meta">${t.entry_date} 买入 · ${t.entry_score}分 · 持仓${days}天</div>
+                        <div class="name">📊 ${t.name} (${t.code}) ${boostTag}</div>
+                        <div class="meta">${t.entry_date} 买入 · ${t.entry_score}分 · 持仓${days}天${hist.length > 1 ? ' · 点击查看信号历史' : ''}</div>
+                        ${histHtml}
                     </div>
                     <div class="track-right">
                         <div class="return ${cls}">${ret>=0?'+':''}${ret.toFixed(2)}%</div>
@@ -272,10 +307,31 @@ async function loadTracking() {
                 const cls = ret >= 0 ? 'up' : 'down';
                 const icon = ret >= 0 ? '✅' : '❌';
                 const exitInfo = t.exit_date ? `${t.exit_date} · ${t.exit_reason || '已平仓'}` : (t.exit_reason || '已平仓');
-                html += `<div class="track-item" style="opacity:0.75">
+                const hist = t.signal_history || [];
+                const boostCount = hist.filter(h => h.action && h.action.includes('增强')).length;
+                const boostTag = boostCount > 0 ? `<span class="boost-tag">🔄 ×${boostCount}</span>` : '';
+                
+                let histHtml = '';
+                if (hist.length > 1) {
+                    histHtml = '<div class="signal-timeline">';
+                    hist.forEach(h => {
+                        const isBoost = h.action && h.action.includes('增强');
+                        const hIcon = isBoost ? '🔄' : '🎯';
+                        histHtml += `<div class="timeline-item ${isBoost ? 'boost' : 'entry'}">
+                            <span class="tl-icon">${hIcon}</span>
+                            <span class="tl-date">${h.date}</span>
+                            <span class="tl-score">${h.score}分</span>
+                            <span class="tl-price">¥${h.price}</span>
+                        </div>`;
+                    });
+                    histHtml += '</div>';
+                }
+                
+                html += `<div class="track-item" style="opacity:0.75" onclick="this.querySelector('.signal-timeline')?.classList.toggle('show')">
                     <div class="track-left">
-                        <div class="name">${icon} ${t.name} (${t.code})</div>
-                        <div class="meta">${t.entry_date} → ${exitInfo}</div>
+                        <div class="name">${icon} ${t.name} (${t.code}) ${boostTag}</div>
+                        <div class="meta">${t.entry_date} → ${exitInfo}${hist.length > 1 ? ' · 点击查看历史' : ''}</div>
+                        ${histHtml}
                     </div>
                     <div class="track-right">
                         <div class="return ${cls}">${ret>=0?'+':''}${ret.toFixed(2)}%</div>
