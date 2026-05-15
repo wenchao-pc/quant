@@ -358,8 +358,20 @@ def update_trading(data):
             })
             tracking['summary']['total_signals'] += 1
     
-    # 注意：不移除旧持仓！持仓股票在持有期间分数会波动回落，不再触发信号是正常的
-    # 只有超时平仓逻辑（下面）才会移出追踪
+    # 对比 data.signals，清理不再属于信号的 active 持仓（脏数据清理）
+    signal_codes = {sig['code'] for sig in data['signals']}
+    stale_active = []
+    for pos in tracking['active']:
+        if pos['code'] not in signal_codes:
+            # 信号消失，清理出场
+            pos['status'] = 'signal_lost'
+            pos['exit_date'] = date_str
+            pos['exit_reason'] = '信号消失，清理出场'
+            tracking['closed'].append(pos)
+            print(f"🧹 清理脏数据: {pos['name']}({pos['code']}) 不在最新signals中，标记平仓")
+        else:
+            stale_active.append(pos)
+    tracking['active'] = stale_active
     
     # 更新active持仓的当前价格和收益
     # （简化版：用当日数据，实际应该获取最新价）
