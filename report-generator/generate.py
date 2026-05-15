@@ -106,6 +106,53 @@ def _get_previous_trading_date(today):
     return today
 
 
+def get_backtest_stats():
+    """从 tracking.json 动态计算策略战绩"""
+    import math
+    tracking_path = os.path.join(REPORT_DIR, 'data', 'tracking.json')
+    if not os.path.exists(tracking_path):
+        return {'win_rate': 0, 'avg_return': 0, 'sharpe': 0, 'max_drawdown': 0, 'profit_factor': 0, 'total_trades': 0, 'signal_count': 0, 'period': '暂无数据'}
+    with open(tracking_path) as f:
+        tracking = json.load(f)
+    
+    closed = tracking.get('closed', [])
+    total_trades = len(closed)
+    if total_trades == 0:
+        return {'win_rate': 0, 'avg_return': 0, 'sharpe': 0, 'max_drawdown': 0, 'profit_factor': 0, 'total_trades': 0, 'signal_count': 0, 'period': '暂无数据'}
+    
+    returns = [p.get('current_return', 0) for p in closed]
+    wins = sum(1 for r in returns if r > 0)
+    total_return = round(sum(returns), 2)
+    win_rate = round(wins / total_trades * 100, 1)
+    avg_return = round(total_return / total_trades, 2)
+    max_drawdown = round(min(returns), 2)
+    max_return = round(max(returns), 2)
+    
+    gains = [r for r in returns if r > 0]
+    losses = [r for r in returns if r < 0]
+    profit_factor = round(abs(sum(gains) / (sum(losses) + 0.01)), 2) if losses else 0
+    
+    std = math.sqrt(sum((r - avg_return)**2 for r in returns) / total_trades) if total_trades > 1 else 0.5
+    sharpe = round(avg_return / (std + 0.1), 2)
+    
+    entry_dates = [p['entry_date'] for p in closed if p.get('entry_date')]
+    period = f"{min(entry_dates)}至{max(entry_dates)}" if entry_dates else '暂无'
+    
+    return {
+        'win_rate': win_rate,
+        'avg_return': avg_return,
+        'sharpe': sharpe,
+        'max_drawdown': max_drawdown,
+        'profit_factor': profit_factor,
+        'annualized': round(avg_return * 50, 1),  # 估算年化（每年约50个交易日）
+        'max_return': max_return,
+        'total_trades': total_trades,
+        'signal_count': tracking.get('summary', {}).get('total_signals', total_trades),
+        'total_return': total_return,
+        'period': period
+    }
+
+
 def run_and_collect(top_n=80, date_str=None):
     """跑选股并收集所有数据。
 
@@ -188,6 +235,9 @@ def run_and_collect(top_n=80, date_str=None):
     # 获取大盘数据
     market = get_market_data()
     
+    # 从 tracking.json 动态计算策略战绩
+    backtest = get_backtest_stats()
+    
     data = {
         'date': date_str,
         'weekday': ['周一','周二','周三','周四','周五','周六','周日'][datetime.strptime(date_str, '%Y-%m-%d').weekday()],
@@ -198,11 +248,7 @@ def run_and_collect(top_n=80, date_str=None):
         'market': market,
         'signals': results,
         'top10': top10[:10],
-        'backtest': {
-            'win_rate': 63.6, 'avg_return': 2.66, 'sharpe': 2.36,
-            'max_drawdown': -2.72, 'profit_factor': 2.46, 'annualized': 48.6,
-            'total_trades': 50, 'signal_count': 11, 'period': '2026.1.9-4.17'
-        }
+        'backtest': backtest
     }
     
     return data

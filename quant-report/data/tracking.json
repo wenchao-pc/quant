@@ -8,7 +8,7 @@
       "entry_price": 13.02,
       "entry_score": 71.0,
       "current_price": 13.02,
-      "current_return": 0,
+      "current_return": 0.0,
       "status": "signal_lost",
       "days": 0,
       "signal_history": [
@@ -20,7 +20,8 @@
         }
       ],
       "exit_date": "2026-05-11",
-      "exit_reason": "信号消失，清理出场"
+      "exit_reason": "信号消失，清理出场",
+      "exit_price": 13.02
     },
     {
       "name": "蓝思科技",
@@ -29,7 +30,7 @@
       "entry_price": 30.82,
       "entry_score": 84.8,
       "current_price": 30.82,
-      "current_return": 0,
+      "current_return": -1.1,
       "status": "signal_lost",
       "days": 0,
       "signal_history": [
@@ -47,7 +48,8 @@
         }
       ],
       "exit_date": "2026-05-12",
-      "exit_reason": "信号消失，清理出场"
+      "exit_reason": "信号消失，清理出场",
+      "exit_price": 30.48
     },
     {
       "name": "数据港",
@@ -56,7 +58,7 @@
       "entry_price": 42.31,
       "entry_score": 81.0,
       "current_price": 42.31,
-      "current_return": 0,
+      "current_return": -4.92,
       "status": "signal_lost",
       "days": 0,
       "signal_history": [
@@ -68,7 +70,8 @@
         }
       ],
       "exit_date": "2026-05-12",
-      "exit_reason": "信号消失，清理出场"
+      "exit_reason": "信号消失，清理出场",
+      "exit_price": 40.23
     },
     {
       "name": "烽火通信",
@@ -77,7 +80,7 @@
       "entry_price": 58.61,
       "entry_score": 72.0,
       "current_price": 58.61,
-      "current_return": 0,
+      "current_return": 0.68,
       "status": "signal_lost",
       "days": 0,
       "signal_history": [
@@ -95,12 +98,21 @@
         }
       ],
       "exit_date": "2026-05-12",
-      "exit_reason": "信号消失，清理出场"
+      "exit_reason": "信号消失，清理出场",
+      "exit_price": 59.01
     }
   ],
   "summary": {
     "total_signals": 6,
-    "wins": 0,
-    "total_return": 0
+    "wins": 1,
+    "total_return": -5.34,
+    "win_rate": 25.0,
+    "avg_return": -1.33,
+    "sharpe": -0.59,
+    "max_drawdown": -4.92,
+    "profit_factor": 0.11,
+    "max_return": 0.68,
+    "total_trades": 4,
+    "period": "2026-04-29至2026-05-14"
   }
 }
