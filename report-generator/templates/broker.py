@@ -121,6 +121,7 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
 </div>
 <div class="container">
 <h1>📈 <span>量化日报</span> | {date} {weekday}</h1>
+<p style="color:#666;font-size:12px;margin:2px 0">生成时间: {data.get('generated_at','')}</p>
 
 <div class="section">
 <div class="section-title">📊 大盘概览</div>

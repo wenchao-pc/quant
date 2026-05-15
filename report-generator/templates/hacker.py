@@ -14,6 +14,7 @@ def render_hacker(data):
 
     # 回测指标颜色（hacker风格：涨=red，跌=bright）
     avg_return = backtest.get('avg_return', 0)
+    avg_return_str = backtest.get('avg_return_str', str(avg_return))
     max_drawdown = backtest.get('max_drawdown', 0)
     bt_ar_cls = 'red' if avg_return > 0 else 'bright'
     bt_md_cls = 'bright' if max_drawdown < 0 else 'red'
@@ -173,7 +174,7 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
 </pre>
 
 <p class="dim">═══════════════════════════════════════════════════════════════</p>
-<p><span class="cmd">date</span> <span class="white">%(date)s 15:30:00 CST</span></p>
+<p><span class="cmd">date</span> <span class="white">%(generated_at)s CST</span></p>
 <p><span class="cmd">uname</span> <span class="white">QuantSystem 2.0 | Python 3.11 | Tencent+Sina API</span></p>
 <p><span class="cmd">wc -l</span> <span class="white">%(total_scanned)d stocks scanned | %(active_analyzed)d active analyzed | 4 strategies</span></p>
 <p class="dim">═══════════════════════════════════════════════════════════════</p>
@@ -225,7 +226,7 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
   │  Trades:    <span class="white">%(bt_trades)d</span>              │
   │                                                         │
   │  Win Rate (&ge;70):  <span class="bright">%(bt_wr)5.1f%%</span>  ████████████████░░░░░░░  │
-  │  Avg Return:      <span class="%(bt_ar_cls)s">+%(bt_ar)4.2f%%</span> per trade                    │
+  │  Avg Return:      <span class="%(bt_ar_cls)s">%(avg_return_str)s%%</span> per trade                    │
   │  Sharpe Ratio:    <span class="cyan">%(bt_sh)5.2f</span>                                  │
   │  Max Drawdown:    <span class="%(bt_md_cls)s">%(bt_md)5.2f%%</span>                                │
   │  Profit Factor:   <span class="bright">%(bt_pf)5.2f</span>                                  │
@@ -280,6 +281,7 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
         bt_trades=backtest.get('total_trades', 0),
         bt_wr=backtest.get('win_rate', 0),
         bt_ar=backtest.get('avg_return', 0),
+        avg_return_str=avg_return_str,
         bt_ar_cls=bt_ar_cls,
         bt_sh=backtest.get('sharpe', 0),
         bt_md=backtest.get('max_drawdown', 0),

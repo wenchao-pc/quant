@@ -13,9 +13,10 @@ def render_social(data):
 
     # 回测指标颜色：正数绿色，负数红色
     avg_return = backtest.get('avg_return', 0)
+    avg_return_str = backtest.get('avg_return_str', str(avg_return))
     max_drawdown = backtest.get('max_drawdown', 0)
     ar_cls = 'red' if avg_return > 0 else 'green'
-    md_cls = 'green' if max_drawdown < 0 else 'red'
+    md_cls = 'red' if max_drawdown < 0 else 'green'
     
     # 大盘概览小卡
     market_cards = ''
@@ -212,6 +213,7 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
 <h2>量化日报</h2>
 <p>多因子评分 · 只推高置信度信号</p>
 <div class="date-tag">{date} {weekday}</div>
+<p style="font-size:11px;color:rgba(255,255,255,.4);margin-top:4px">生成: {data.get('generated_at','')}</p>
 </div>
 
 <div class="section-label">📊 大盘</div>
@@ -234,7 +236,7 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
 <div class="section-label">📈 策略战绩</div>
 <div class="stats-row">
 <div class="stat-item"><div class="val green">{backtest.get("win_rate",0)}%</div><div class="label">信号胜率(≥70)</div></div>
-<div class="stat-item"><div class="val {ar_cls}">+{avg_return}%</div><div class="label">平均每笔收益</div></div>
+<div class="stat-item"><div class="val {ar_cls}">{avg_return_str}%</div><div class="label">平均每笔收益</div></div>
 <div class="stat-item"><div class="val blue">{backtest.get("sharpe",0)}</div><div class="label">夏普比率</div></div>
 <div class="stat-item"><div class="val {md_cls}">{max_drawdown}%</div><div class="label">最大回撤</div></div>
 </div>
