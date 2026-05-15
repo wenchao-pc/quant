@@ -141,6 +141,7 @@ def get_backtest_stats():
     return {
         'win_rate': win_rate,
         'avg_return': avg_return,
+        'avg_return_str': f"+{avg_return}" if avg_return > 0 else str(avg_return),
         'sharpe': sharpe,
         'max_drawdown': max_drawdown,
         'profit_factor': profit_factor,

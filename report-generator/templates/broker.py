@@ -14,9 +14,10 @@ def render_broker(data):
 
     # 回测指标颜色
     avg_return = backtest.get('avg_return', 0)
+    avg_return_str = backtest.get('avg_return_str', str(avg_return))
     max_drawdown = backtest.get('max_drawdown', 0)
-    ar_color = 'color:#c00' if avg_return > 0 else 'color:#090'
-    md_color = 'color:#090' if max_drawdown < 0 else 'color:#c00'
+    ar_color = 'color:#090' if avg_return > 0 else 'color:#c00'
+    md_color = 'color:#c00' if max_drawdown < 0 else 'color:#090'
     
     # 大盘行
     market_rows = ''
@@ -155,7 +156,7 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
 <div class="section-title">📊 策略回测表现</div>
 <div class="stat-grid">
 <div class="stat-card"><div class="val">{backtest.get("win_rate",0)}%</div><div class="label">信号胜率(≥70)</div></div>
-<div class="stat-card"><div class="val" style="{ar_color}">+{avg_return}%</div><div class="label">平均每笔收益</div></div>
+<div class="stat-card"><div class="val" style="{ar_color}">{avg_return_str}%</div><div class="label">平均每笔收益</div></div>
 <div class="stat-card"><div class="val">{backtest.get("sharpe",0)}</div><div class="label">夏普比率</div></div>
 <div class="stat-card"><div class="val" style="{md_color}">{max_drawdown}%</div><div class="label">最大回撤</div></div>
 </div>
