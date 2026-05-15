@@ -16,7 +16,7 @@ def render_broker(data):
     avg_return = backtest.get('avg_return', 0)
     avg_return_str = backtest.get('avg_return_str', str(avg_return))
     max_drawdown = backtest.get('max_drawdown', 0)
-    ar_color = 'color:#090' if avg_return > 0 else 'color:#c00'
+    ar_color = 'color:#c00' if avg_return > 0 else 'color:#090'
     md_color = 'color:#c00' if max_drawdown < 0 else 'color:#090'
     
     # 大盘行
