@@ -1,5 +1,25 @@
 {
-  "active": [],
+  "active": [
+    {
+      "name": "300394",
+      "code": "300394",
+      "entry_date": "2026-05-13",
+      "entry_price": 378.19,
+      "entry_score": 70.0,
+      "current_price": 399.42,
+      "current_return": 5.61,
+      "status": "holding",
+      "days": 1,
+      "signal_history": [
+        {
+          "date": "2026-05-13",
+          "score": 70.0,
+          "price": 378.19,
+          "action": "首次入场"
+        }
+      ]
+    }
+  ],
   "closed": [
     {
       "name": "格力电器",
@@ -150,8 +170,8 @@
     }
   ],
   "summary": {
-    "total_signals": 7,
+    "total_signals": 8,
     "wins": 4,
-    "total_return": 0.43000000000000016
+    "total_return": 0.43
   }
 }

@@ -1,31 +1,31 @@
 {
   "date": "2026-05-12",
   "weekday": "周二",
-  "generated_at": "2026-05-13 03:45:41",
+  "generated_at": "2026-05-15 03:25:05",
   "total_scanned": 4386,
   "active_analyzed": 80,
   "signal_count": 0,
   "market": {
     "000001": {
       "name": "上证指数",
-      "price": 4214.49,
-      "change_pct": -0.25,
-      "change": -10.53,
-      "volume": 146527259.0
+      "price": 4177.92,
+      "change_pct": -1.52,
+      "change": -64.65,
+      "volume": 149811680.0
     },
     "399001": {
       "name": "深证成指",
-      "price": 15824.92,
-      "change_pct": -0.47,
-      "change": -74.38,
-      "volume": 177738375.0
+      "price": 15745.74,
+      "change_pct": -2.14,
+      "change": -344.01,
+      "volume": 186413688.0
     },
     "399006": {
       "name": "创业板指",
-      "price": 3934.88,
-      "change_pct": 0.15,
-      "change": 5.91,
-      "volume": 83829326.0
+      "price": 3951.14,
+      "change_pct": -2.16,
+      "change": -87.19,
+      "volume": 88738249.0
     }
   },
   "signals": [],

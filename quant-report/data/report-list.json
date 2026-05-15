@@ -3,29 +3,29 @@
     "date": "2026-05-14",
     "weekday": "周四",
     "signal_count": 0,
-    "total_scanned": 4228,
-    "generated_at": "2026-05-15 00:47:31"
+    "total_scanned": 3962,
+    "generated_at": "2026-05-15 12:03:39"
   },
   {
     "date": "2026-05-13",
     "weekday": "周三",
     "signal_count": 0,
-    "total_scanned": 4228,
-    "generated_at": "2026-05-15 00:41:36"
+    "total_scanned": 3962,
+    "generated_at": "2026-05-15 03:25:44"
   },
   {
     "date": "2026-05-12",
     "weekday": "周二",
     "signal_count": 0,
     "total_scanned": 4386,
-    "generated_at": "2026-05-13 03:45:41"
+    "generated_at": "2026-05-15 03:25:05"
   },
   {
     "date": "2026-05-11",
     "weekday": "周一",
     "signal_count": 3,
-    "total_scanned": 4465,
-    "generated_at": "2026-05-11 16:48:33"
+    "total_scanned": 3961,
+    "generated_at": "2026-05-15 03:24:31"
   },
   {
     "date": "2026-05-08",

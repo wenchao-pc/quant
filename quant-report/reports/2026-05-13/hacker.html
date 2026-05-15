@@ -77,7 +77,7 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
 <p class="dim">═══════════════════════════════════════════════════════════════</p>
 <p><span class="cmd">date</span> <span class="white">2026-05-13 15:30:00 CST</span></p>
 <p><span class="cmd">uname</span> <span class="white">QuantSystem 2.0 | Python 3.11 | Tencent+Sina API</span></p>
-<p><span class="cmd">wc -l</span> <span class="white">4228 stocks scanned | 80 active analyzed | 4 strategies</span></p>
+<p><span class="cmd">wc -l</span> <span class="white">3962 stocks scanned | 80 active analyzed | 4 strategies</span></p>
 <p class="dim">═══════════════════════════════════════════════════════════════</p>
 
 <div class="box">
@@ -98,17 +98,15 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
 <span class="dim">[SCAN]</span> Strategy 3: Consecutive Rally ..... <span class="bright">DONE</span>
 <span class="dim">[SCAN]</span> Strategy 4: Support Bounce ........ <span class="bright">DONE</span>
 <span class="dim">[SCAN]</span> ─────────────────────────────────────────
-<span class="dim">[SCAN]</span> Results: <span class="yellow">0 signals &ge; 70</span> | <span class="bright">80 stocks scored</span>
+<span class="dim">[SCAN]</span> Results: <span class="yellow">1 signals &ge; 70</span> | <span class="bright">80 stocks scored</span>
 
   +-----------------------------------------+
   |                                         |
-  |   <span class="signal-safe">&#10003; CLEAR - NO ACTION REQUIRED</span>         |
+  |   <span class="red">&#9889; 1 SIGNAL(S) DETECTED</span>              |
   |                                         |
-  |   Highest score: <span class="yellow">0.0</span> (工业富联)        |
-  |   Threshold:    70.0                    |
-  |   Gap:          70.0 pts                 |
-  |                                         |
-  |   <span class="dim">"不操作就是最好的操作"</span>              |
+  |   Top Signal: <span class="yellow">300394 70pts</span>       |
+  |   Threshold:  70.0 pts                  |
+  |   Action:     <span class="red">MONITOR &amp; PREPARE</span>              |
   |                                         |
   +-----------------------------------------+
 </pre>
@@ -117,32 +115,35 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
 <div class="box">
 <div class="box-title">&#9656; TOP 5 SCORES</div>
 <pre>
-<span class="white">工业富联 601138</span> |<span class="dim"></span><span class="dim">░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░</span> 0
-<span class="white">立讯精密 002475</span> |<span class="dim"></span><span class="dim">░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░</span> 0
-<span class="white">中天科技 600522</span> |<span class="dim"></span><span class="dim">░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░</span> 0
-<span class="white">大唐发电 601991</span> |<span class="dim"></span><span class="dim">░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░</span> 0
-<span class="white">信维通信 300136</span> |<span class="dim"></span><span class="dim">░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░</span> 0
+<span class="white">300394 300394</span> |<span class="yellow">████████████████████████████</span><span class="dim">░░░░░░░░░░░░</span> 70.0
+<span class="white">300502 300502</span> |<span class="dim">███████████████████████</span><span class="dim">░░░░░░░░░░░░░░░░</span> 59.5
+<span class="white">601138 601138</span> |<span class="dim">███████████████████</span><span class="dim">░░░░░░░░░░░░░░░░░░░░</span> 49.2
+<span class="white">300476 300476</span> |<span class="dim">███████████████████</span><span class="dim">░░░░░░░░░░░░░░░░░░░░░</span> 47.5
+<span class="white">300308 300308</span> |<span class="dim">████████████████</span><span class="dim">░░░░░░░░░░░░░░░░░░░░░░░</span> 42.0
                  +──────────────────────────────────────────+
                  0        20        40        60      <span class="red">70 THRESHOLD</span>
 </pre>
 </div>
 
-
+<div class="box"><div class="box-title">&#9656; SIGNAL STOCKS</div>
+<table class="term-table"><tr><th>#</th><th>TICKER</th><th>NAME</th><th>SCORE</th><th>CHANGE</th><th>Vol(亿)</th><th>ACTION</th></tr>
+<tr><td>01</td><td>300394</td><td>300394</td><td class="yellow">70.0</td><td class="red">+10.44%</td><td class="white">0.3</td><td class="red">BUY</td></tr>
+</table></div>
 
 <div class="box">
 <div class="box-title">&#9656; ACTIVE STOCKS TOP 10</div>
 <table class="term-table">
 <tr><th>#</th><th>TICKER</th><th>NAME</th><th>SCORE</th><th>CHANGE</th><th>Vol(亿)</th><th>STATUS</th></tr>
-<tr><td>01</td><td>601138</td><td>工业富联</td><td class="dim">0</td><td class="bright">+0.00%</td><td class="white">0.0</td><td><span class="dim">WAIT</span></td></tr>
-<tr><td>02</td><td>002475</td><td>立讯精密</td><td class="dim">0</td><td class="bright">+0.00%</td><td class="white">0.0</td><td><span class="dim">WAIT</span></td></tr>
-<tr><td>03</td><td>600522</td><td>中天科技</td><td class="dim">0</td><td class="bright">+0.00%</td><td class="white">0.0</td><td><span class="dim">WAIT</span></td></tr>
-<tr><td>04</td><td>601991</td><td>大唐发电</td><td class="dim">0</td><td class="bright">+0.00%</td><td class="white">0.0</td><td><span class="dim">WAIT</span></td></tr>
-<tr><td>05</td><td>300136</td><td>信维通信</td><td class="dim">0</td><td class="bright">+0.00%</td><td class="white">0.0</td><td><span class="dim">WAIT</span></td></tr>
-<tr><td>06</td><td>000988</td><td>华工科技</td><td class="dim">0</td><td class="bright">+0.00%</td><td class="white">0.0</td><td><span class="dim">WAIT</span></td></tr>
-<tr><td>07</td><td>000066</td><td>中国长城</td><td class="dim">0</td><td class="bright">+0.00%</td><td class="white">0.0</td><td><span class="dim">WAIT</span></td></tr>
-<tr><td>08</td><td>300274</td><td>阳光电源</td><td class="dim">0</td><td class="bright">+0.00%</td><td class="white">0.0</td><td><span class="dim">WAIT</span></td></tr>
-<tr><td>09</td><td>600487</td><td>亨通光电</td><td class="dim">0</td><td class="bright">+0.00%</td><td class="white">0.0</td><td><span class="dim">WAIT</span></td></tr>
-<tr><td>10</td><td>000977</td><td>浪潮信息</td><td class="dim">0</td><td class="bright">+0.00%</td><td class="white">0.0</td><td><span class="dim">WAIT</span></td></tr>
+<tr><td>01</td><td>601138</td><td>601138</td><td class="dim">49.2</td><td class="red">+10.00%</td><td class="white">0.3</td><td><span class="dim">WAIT</span></td></tr>
+<tr><td>02</td><td>300308</td><td>300308</td><td class="dim">42.0</td><td class="red">+3.07%</td><td class="white">0.3</td><td><span class="dim">WAIT</span></td></tr>
+<tr><td>03</td><td>300394</td><td>300394</td><td class="yellow">70.0</td><td class="red">+10.44%</td><td class="white">0.3</td><td><span class="yellow">NEAR</span></td></tr>
+<tr><td>04</td><td>300502</td><td>300502</td><td class="yellow">59.5</td><td class="red">+6.16%</td><td class="white">0.3</td><td><span class="yellow">NEAR</span></td></tr>
+<tr><td>05</td><td>002475</td><td>002475</td><td class="dim">40.5</td><td class="red">+3.83%</td><td class="white">0.2</td><td><span class="dim">WAIT</span></td></tr>
+<tr><td>06</td><td>300476</td><td>300476</td><td class="dim">47.5</td><td class="red">+3.19%</td><td class="white">0.2</td><td><span class="dim">WAIT</span></td></tr>
+<tr><td>07</td><td>002384</td><td>002384</td><td class="dim">35.5</td><td class="red">+0.59%</td><td class="white">0.2</td><td><span class="dim">WAIT</span></td></tr>
+<tr><td>08</td><td>603986</td><td>603986</td><td class="dim">37.0</td><td class="red">+3.24%</td><td class="white">0.2</td><td><span class="dim">WAIT</span></td></tr>
+<tr><td>09</td><td>002281</td><td>002281</td><td class="dim">29.5</td><td class="bright">-1.75%</td><td class="white">0.2</td><td><span class="dim">WAIT</span></td></tr>
+<tr><td>10</td><td>300750</td><td>300750</td><td class="dim">24.0</td><td class="red">+0.65%</td><td class="white">0.1</td><td><span class="dim">WAIT</span></td></tr>
 </table>
 </div>
 
@@ -179,8 +180,8 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
   NO_CHASE_LIMIT = true    <span class="dim"># 不追涨停</span>
 
 <span class="cmd">quant --today</span>
-  <span class="yellow">STATUS: CLEAR</span>
-  <span class="dim">→ 空仓观望，等待下一个信号</span>
+  <span class="red">STATUS: SIGNAL DETECTED</span>
+  <span class="dim">→ 关注信号股，观察买入时机</span>
   <span class="dim">→ 预计信号周期：1-2次/周</span>
 </pre>
 </div>
