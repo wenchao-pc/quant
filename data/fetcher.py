@@ -9,6 +9,96 @@ import time
 import re
 from datetime import datetime, timedelta
 
+
+# ── 报告日期判断 ──────────────────────────────────────────────
+def is_trading_closed():
+    """当前是否已收盘（15:05之后）"""
+    now = datetime.now()
+    return (now.hour + now.minute / 60.0) >= 15.05
+
+
+def get_today_is_trading_day():
+    """用baostock判断今天是否为交易日"""
+    try:
+        import baostock as bs
+        bs.login()
+        today = datetime.now().strftime('%Y-%m-%d')
+        rs = bs.query_trade_dates(start_date=today, end_date=today)
+        rows = []
+        while rs.next():
+            rows.append(rs.get_row_data())
+        bs.logout()
+        if rows and rows[0][1] == '1':  # is_trading_day='1'
+            return True
+    except Exception:
+        pass
+    return False
+
+
+def get_previous_trading_date(today=None):
+    """获取上一个交易日（不含今天），用baostock"""
+    if today is None:
+        today = datetime.now().strftime('%Y-%m-%d')
+    try:
+        import baostock as bs
+        bs.login()
+        start = (datetime.strptime(today, '%Y-%m-%d') - timedelta(days=7)).strftime('%Y-%m-%d')
+        rs = bs.query_trade_dates(start_date=start, end_date=today)
+        rows = []
+        while rs.next():
+            rows.append(rs.get_row_data())
+        bs.logout()
+        # 找today之前最近的is_trading_day='1'
+        for row in reversed(rows):
+            if row[0] < today and row[1] == '1':
+                return row[0]
+    except Exception:
+        pass
+    # 降级：往前推1-2天（跳过周末）
+    d = datetime.strptime(today, '%Y-%m-%d')
+    for i in range(1, 8):
+        prev = (d - timedelta(days=i)).strftime('%Y-%m-%d')
+        wd = datetime.strptime(prev, '%Y-%m-%d').weekday()
+        if wd < 5:  # 不是周末
+            return prev
+    return today
+
+
+def get_report_date():
+    """判断应生成哪一天的报告：
+    - 交易日 + 盘后(>=15:05) → 今日
+    - 盘中(<15:05) 或 非交易日 → 上一交易日
+    """
+    today = datetime.now().strftime('%Y-%m-%d')
+    now = datetime.now()
+
+    # 周末 → 非交易日
+    if now.weekday() >= 5:
+        prev = get_previous_trading_date(today)
+        print(f"  📅 今日({today}周末)，生成上一交易日({prev})报告")
+        return prev
+
+    # 用baostock确认是否交易日
+    is_trading = get_today_is_trading_day()
+
+    if not is_trading:
+        prev = get_previous_trading_date(today)
+        print(f"  📅 今日({today}非交易日)，生成上一交易日({prev})报告")
+        return prev
+
+    # 交易日：盘后(>=15:05) → 今日；盘中 → 上一交易日
+    if (now.hour + now.minute / 60.0) >= 15.05:
+        print(f"  📅 今日({today}已收盘)，生成今日报告")
+        return today
+    else:
+        prev = get_previous_trading_date(today)
+        print(f"  📅 今日({today}盘中)，生成上一交易日({prev})报告")
+        return prev
+
+
+def _cache_path(name):
+    return os.path.join(os.path.dirname(__file__), '..', 'cache', name)
+
 CACHE_DIR = os.path.join(os.path.dirname(__file__), '..', 'cache')
 os.makedirs(CACHE_DIR, exist_ok=True)
 
@@ -45,8 +135,9 @@ def _get_stock_list():
 
 
 def fetch_tencent_batch(codes, batch_size=60):
-    """批量获取腾讯行情数据"""
+    """批量获取腾讯行情数据，返回DataFrame含'数据日期'字段（从parts[30]解析）"""
     all_data = []
+    today_str = datetime.now().strftime('%Y-%m-%d')
     
     for i in range(0, len(codes), batch_size):
         batch = codes[i:i+batch_size]
@@ -86,6 +177,13 @@ def fetch_tencent_batch(codes, batch_size=60):
                     change_pct = float(parts[32]) if parts[32] else 0
                     turnover = float(parts[37]) if parts[37] else 0  # 成交额（万）
                     
+                    # 从parts[30]解析数据日期，格式：20260515111658
+                    raw_ts = parts[30] if len(parts) > 30 and parts[30] else ''
+                    if raw_ts and len(raw_ts) >= 8:
+                        data_date = f"{raw_ts[0:4]}-{raw_ts[4:6]}-{raw_ts[6:8]}"
+                    else:
+                        data_date = today_str  # 兜底：无法解析时用今天
+                    
                     if price > 0:
                         all_data.append({
                             '代码': code,
@@ -99,6 +197,7 @@ def fetch_tencent_batch(codes, batch_size=60):
                             '涨跌幅': change_pct,
                             '成交量': vol * 100,  # 手->股
                             '成交额': turnover * 10000,  # 万->元
+                            '数据日期': data_date,  # 从腾讯时间戳提取
                         })
                 except (ValueError, IndexError):
                     continue
@@ -116,7 +215,15 @@ def get_all_stocks(date_str=None):
     """获取全A股行情。如果指定date_str，优先读取该日期的快照缓存。
     收盘后首次运行会生成快照，之后再跑同一日期直接读快照，结果一致。
     没有快照的历史日期无法获取数据，会报错退出。
+    
+    盘中（<15:05）取腾讯API数据：校验'数据日期'字段必须匹配目标日期，
+    避免缓存过期或跨日数据干扰。
     """
+    from datetime import datetime
+    today = datetime.now().strftime('%Y-%m-%d')
+    now_h = datetime.now().hour + datetime.now().minute / 60.0
+    is_trading_close = now_h >= 15.05  # 收盘后认为数据是当日确定的
+
     # 如果指定了日期，优先找该日期的快照
     if date_str:
         snapshot = _cache_path(f'snapshot_{date_str}.csv')
@@ -125,28 +232,46 @@ def get_all_stocks(date_str=None):
             print(f"  📦 使用日期快照 {date_str} ({len(df)}只)")
             return df
         # 没有快照，检查是不是今天（今天还可以从API拿）
-        from datetime import datetime
-        today = datetime.now().strftime('%Y-%m-%d')
         if date_str != today:
-            print(f"  ⚠️ {date_str} 无快照数据，降级方案：用当前排名 + baostock历史K线")
-            # 降级：用当前API拿全市场数据（排名可能不准），标记为降级
-            df = _fetch_all_from_api()
-            if len(df) > 0:
+            # 无快照：用Tushare获取历史全市场行情
+            print(f"  ⚠️ {date_str} 无快照，用Tushare重建历史排名...")
+            df = _fetch_via_tushare(date_str)
+            if df is not None and len(df) > 0:
+                print(f"  📡 Tushare返回 {len(df)} 只，按成交额排序")
                 df['数据降级'] = True
-            return df
+                return df
+            raise ValueError(f"[{date_str}] Tushare无法获取该日数据。")
     
-    cached = _load_cache('all_stocks_tencent.csv', max_age_hours=6)
+    # 缓存策略：收盘后(>15:05)缓存6小时；盘中缓存30分钟
+    cache_age = 0.5 if not is_trading_close else 6
+    cached = _load_cache('all_stocks_tencent.csv', max_age_hours=cache_age)
     if cached is not None:
-        print(f"  📦 使用缓存({len(cached)}只)")
-        # 如果指定了日期（=今天），把当前缓存存为快照
-        if date_str:
-            _save_cache(f'snapshot_{date_str}.csv', cached)
-        return cached
+        # 日期校验：盘中必须数据日期==today，历史日期快照直接用
+        if date_str and not is_trading_close and '数据日期' in cached.columns:
+            if cached['数据日期'].iloc[0] != date_str:
+                print(f"  ⚠️ 缓存数据日期={cached['数据日期'].iloc[0]}，目标={date_str}，重新获取...")
+            else:
+                print(f"  📦 使用缓存({len(cached)}只, {cache_age}h有效)")
+                if date_str:
+                    _save_cache(f'snapshot_{date_str}.csv', cached)
+                return cached
+        else:
+            print(f"  📦 使用缓存({len(cached)}只)")
+            if date_str:
+                _save_cache(f'snapshot_{date_str}.csv', cached)
+            return cached
     
     # 先获取代码列表
-    df = _fetch_all_from_api()
+    df = _fetch_all_from_api(date_str=date_str)
     if len(df) == 0:
         return df
+    
+    # 盘中严格校验数据日期
+    if date_str and not is_trading_close and '数据日期' in df.columns:
+        actual = df['数据日期'].iloc[0]
+        if actual != date_str:
+            raise ValueError(f"腾讯API返回数据日期={actual}，期望={date_str}，请确认当前时间是否已收盘或API状态")
+    
     # 存缓存和快照
     _save_cache('all_stocks_tencent.csv', df)
     if date_str:
@@ -156,7 +281,7 @@ def get_all_stocks(date_str=None):
     return df
 
 
-def _fetch_all_from_api():
+def _fetch_all_from_api(date_str=None):
     """从腾讯API获取全市场数据（不含缓存逻辑，纯API调用）"""
     print("  🌐 获取A股代码列表...")
     codes = _get_stock_list()
@@ -274,7 +399,7 @@ def get_stock_history(symbol, days=120, date_str=None):
                             '涨跌幅': float(pct_str),
                             '最低': float(item[5]),
                             '最高': float(item[6]),
-                            '成交量': float(item[7]),
+                            '成交量': float(item[7]) * 100,  # 搜狐: 手->股
                             '成交额': turnover_wan,
                             '换手率': float(item[9].replace('%', '')),
                             '振幅': 0,
@@ -293,6 +418,41 @@ def _truncate_to_date(df, date_str):
     if date_str and '日期' in df.columns:
         df = df[df['日期'] <= date_str].copy()
     return df
+
+def _fetch_via_tushare(date_str):
+    """用Tushare获取历史全市场行情（成交额排名）。只含上证+深证，排除688科创板。"""
+    import tushare as ts
+    # 转换日期格式 2026-05-11 -> 20260511
+    trade_date = date_str.replace('-', '')
+    pro = ts.pro_api('73becc5913434082458bf51eb65f9966e64b977230f97527cc9f3baf')
+    df = pro.daily(trade_date=trade_date, fields='ts_code,trade_date,open,high,low,close,vol,amount,pct_chg')
+    if df is None or len(df) == 0:
+        return pd.DataFrame()
+    # 转换代码格式: 300502.SZ -> 300502, 600000.SH -> 600000（保持6位，不lstrip）
+    df['代码'] = df['ts_code'].str.replace('.SZ', '').str.replace('.SH', '')
+    # 只留上证(600/601/603开头)和深市(000/001/002/300开头)，排除688科创板
+    df = df[df['代码'].str.match(r'^(600|601|603|000|001|002|300)')]
+    df = df.rename(columns={
+        'vol': '成交量',
+        'amount': '成交额',
+        'pct_chg': '涨跌幅',
+        'open': '今开',
+        'high': '最高',
+        'low': '最低',
+        'close': '最新价',
+    })
+    # Tushare vol=手(×100转股), amount=千元(×1000转元)
+    df['成交量'] = df['成交量'] * 100
+    df['成交额'] = df['成交额'] * 1000
+    # 计算涨跌额（用昨收=前一日收盘，需要查前一交易日数据，这里直接省略）
+    df['涨跌额'] = 0.0
+    # 按成交额降序
+    df = df.sort_values('成交额', ascending=False).reset_index(drop=True)
+    # 补齐其他字段
+    df['名称'] = df['代码']  # tushare不带名称，后续用baostock历史K线补
+    df['数据日期'] = date_str  # 与腾讯数据保持一致
+    return df
+
 
 def get_top_volume_stocks(n=100, date_str=None):
     """获取成交额前N的活跃股"""

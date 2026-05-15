@@ -592,9 +592,12 @@ def save_results(results):
 
 
 if __name__ == '__main__':
-    results = run_daily_screening(top_n=80)
+    # 判断应生成哪天的报告
+    from data.fetcher import get_report_date
+    report_date = get_report_date()
+    results = run_daily_screening(top_n=80, date_str=report_date)
     report = format_report(results, top=15)
     print("\n" + report)
-    
+
     if results:
         save_results(results)

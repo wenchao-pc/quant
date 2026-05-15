@@ -48,33 +48,107 @@ def is_trading_day():
         return True
 
 
-def run_and_collect(top_n=80, date_str=None):
-    """跑选股并收集所有数据。只在交易日运行。
-    date_str: 指定日期则优先用该日快照（收盘后首次运行生成快照，之后再跑结果一致）
+def _should_use_today(now):
+    """判断是否生成今日报告：
+    - 交易日 + 盘后(>=15:05) → True
+    - 非交易日或盘中 → False（生成上一交易日）
     """
-    # 只在交易日运行
-    if not is_trading_day():
-        return None
-    
-    # 确定报告日期
+    today = now.strftime('%Y-%m-%d')
+
+    # 周末 → 非交易日
+    if now.weekday() >= 5:
+        return False
+
+    # 用baostock确认是否交易日
+    try:
+        import baostock as bs
+        bs.login()
+        rs = bs.query_trade_dates(start_date=today, end_date=today)
+        is_trading = False
+        while (rs.error_code == '0') and rs.next():
+            if rs.get_row_data()[1] == '1':
+                is_trading = True
+        bs.logout()
+        if not is_trading:
+            return False
+    except Exception:
+        return False
+
+    # 交易日：盘后(>=15:05) → 今日；盘中 → 上一交易日
+    return (now.hour + now.minute / 60.0) >= 15.05
+
+
+def _get_previous_trading_date(today):
+    """获取上一个交易日（不含today），用baostock"""
+    try:
+        import baostock as bs
+        from datetime import timedelta
+        bs.login()
+        start = (datetime.strptime(today, '%Y-%m-%d') - timedelta(days=7)).strftime('%Y-%m-%d')
+        rs = bs.query_trade_dates(start_date=start, end_date=today)
+        rows = []
+        while rs.next():
+            rows.append(rs.get_row_data())
+        bs.logout()
+        for row in reversed(rows):
+            if row[0] < today and row[1] == '1':
+                return row[0]
+    except Exception:
+        pass
+    # 降级：往前推1-2天（跳过周末）
+    from datetime import timedelta
+    d = datetime.strptime(today, '%Y-%m-%d')
+    for i in range(1, 8):
+        prev = (d - timedelta(days=i)).strftime('%Y-%m-%d')
+        wd = datetime.strptime(prev, '%Y-%m-%d').weekday()
+        if wd < 5:
+            return prev
+    return today
+
+
+def run_and_collect(top_n=80, date_str=None):
+    """跑选股并收集所有数据。
+
+    报告日期判断逻辑（date_str 为 None 时生效）：
+    - 交易日 + 盘后(>=15:05) → 生成今日报告
+    - 盘中(<15:05) 或 非交易日 → 生成上一交易日报告（历史模式）
+
+    date_str 不为 None 时：直接用指定日期运行（历史模式）
+    """
     now = datetime.now()
     today_str = now.strftime('%Y-%m-%d')
-    if date_str is None:
+
+    # 有date_str → 强制历史模式
+    if date_str is not None:
+        is_historical = True
+        print(f"📅 历史报告模式: {date_str}")
+    else:
+        # 无date_str → 按报告日期判断逻辑决定
+        is_historical = not _should_use_today(now)
+
+    if is_historical:
+        if date_str is None:
+            date_str = _get_previous_trading_date(today_str)
+            print(f"  📅 今日({today_str}盘中/非交易日)，生成上一交易日({date_str})报告")
+        # 清K线缓存（历史模式用收盘数据）
+        import glob
+        cache_files = glob.glob(os.path.join(QUANT_DIR, 'cache', 'hist_*.csv'))
+        for f in cache_files:
+            os.remove(f)
+        if cache_files:
+            print(f"  🗑️  清缓存: {len(cache_files)}个K线文件")
+    else:
+        # 今日报告模式
         date_str = today_str
-    
-    # 未收盘不跑（没有快照的情况下，实时数据不完整）
-    if date_str == today_str and (now.hour < 15 or (now.hour == 15 and now.minute < 5)):
-        print(f"⏭️ 未收盘({now.strftime('%H:%M')})，等待15:05后运行")
-        return None
-    
-    # 清K线缓存，确保用最新数据
-    import glob
-    cache_files = glob.glob(os.path.join(QUANT_DIR, 'cache', 'hist_*.csv'))
-    for f in cache_files:
-        os.remove(f)
-    if cache_files:
-        print(f"  🗑️  清缓存: {len(cache_files)}个K线文件")
-    
+        print(f"  📅 今日({today_str}盘后)，生成今日报告")
+        # 清K线缓存（今日实时模式也清）
+        import glob
+        cache_files = glob.glob(os.path.join(QUANT_DIR, 'cache', 'hist_*.csv'))
+        for f in cache_files:
+            os.remove(f)
+        if cache_files:
+            print(f"  🗑️  清缓存: {len(cache_files)}个K线文件")
+
     print("📊 运行选股分析...")
     results = run_daily_screening(top_n=top_n, date_str=date_str)
     
@@ -439,10 +513,9 @@ def generate_all(data):
 
 
 if __name__ == '__main__':
-    data = run_and_collect()
-    if data is None:
-        print("今日非交易日，退出")
-    else:
-        paths = generate_all(data)
-        print(f"\n🌐 主页: file://{os.path.join(REPORT_DIR, 'index.html')}")
-        print(f"📄 社交风格: file://{paths['social']}")
+    import sys
+    date_str = sys.argv[1] if len(sys.argv) > 1 else None
+    data = run_and_collect(date_str=date_str)
+    paths = generate_all(data)
+    print(f"\n🌐 主页: file://{os.path.join(REPORT_DIR, 'index.html')}")
+    print(f"📄 社交风格: file://{paths['social']}")
