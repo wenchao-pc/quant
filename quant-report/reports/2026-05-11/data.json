@@ -1,57 +1,41 @@
 {
   "date": "2026-05-11",
   "weekday": "周一",
-  "generated_at": "2026-05-15 03:24:31",
+  "generated_at": "2026-05-15 12:42:45",
   "total_scanned": 3961,
   "active_analyzed": 80,
-  "signal_count": 3,
+  "signal_count": 0,
   "market": {
     "000001": {
       "name": "上证指数",
-      "price": 4177.92,
-      "change_pct": -1.52,
-      "change": -64.65,
-      "volume": 149811680.0
+      "price": 4183.06,
+      "change_pct": 0.12,
+      "change": 5.14,
+      "volume": 98751562.0
     },
     "399001": {
       "name": "深证成指",
-      "price": 15745.74,
-      "change_pct": -2.14,
-      "change": -344.01,
-      "volume": 186413688.0
+      "price": 15783.18,
+      "change_pct": 0.24,
+      "change": 37.44,
+      "volume": 118282005.0
     },
     "399006": {
       "name": "创业板指",
-      "price": 3951.14,
-      "change_pct": -2.16,
-      "change": -87.19,
-      "volume": 88738249.0
+      "price": 3973.78,
+      "change_pct": 0.57,
+      "change": 22.64,
+      "volume": 56369926.0
     }
   },
-  "signals": [
-    {
-      "code": "300433",
-      "name": "蓝思科技",
-      "total_score": 84.8
-    },
-    {
-      "code": "603881",
-      "name": "数据港",
-      "total_score": 81.0
-    },
-    {
-      "code": "600498",
-      "name": "烽火通信",
-      "total_score": 72.0
-    }
-  ],
+  "signals": [],
   "top10": [
     {
       "code": "300502",
       "name": "300502",
       "price": 563.7,
       "change_pct": 2.1807,
-      "turnover": 31811531.859,
+      "turnover": 31811531859.0,
       "total_score": 23.8,
       "scores": {
         "MACD": 0,
@@ -104,7 +88,7 @@
       "name": "300308",
       "price": 940.13,
       "change_pct": 6.1095,
-      "turnover": 29399331.289,
+      "turnover": 29399331289.0,
       "total_score": 28.0,
       "scores": {
         "MACD": 0,
@@ -157,7 +141,7 @@
       "name": "300476",
       "price": 378.24,
       "change_pct": 5.4592,
-      "turnover": 23338861.424,
+      "turnover": 23338861424.0,
       "total_score": 41.5,
       "scores": {
         "MACD": 70,
@@ -210,7 +194,7 @@
       "name": "603986",
       "price": 362.13,
       "change_pct": 8.3897,
-      "turnover": 20673848.905,
+      "turnover": 20673848905.0,
       "total_score": 44.0,
       "scores": {
         "MACD": 70,
@@ -265,7 +249,7 @@
       "name": "002475",
       "price": 76.06,
       "change_pct": 6.691,
-      "turnover": 20583695.884,
+      "turnover": 20583695884.0,
       "total_score": 47.2,
       "scores": {
         "MACD": 70,
@@ -318,7 +302,7 @@
       "name": "002384",
       "price": 218.3,
       "change_pct": 3.2688,
-      "turnover": 19363925.972,
+      "turnover": 19363925972.0,
       "total_score": 39.5,
       "scores": {
         "MACD": 70,
@@ -371,7 +355,7 @@
       "name": "600522",
       "price": 43.86,
       "change_pct": 7.2372,
-      "turnover": 18293626.375,
+      "turnover": 18293626375.0,
       "total_score": 45.0,
       "scores": {
         "MACD": 70,
@@ -424,7 +408,7 @@
       "name": "600487",
       "price": 74.99,
       "change_pct": -2.9507,
-      "turnover": 18066147.74,
+      "turnover": 18066147740.0,
       "total_score": 28.0,
       "scores": {
         "MACD": 50,
@@ -477,7 +461,7 @@
       "name": "601138",
       "price": 65.85,
       "change_pct": 4.0613,
-      "turnover": 17645516.254,
+      "turnover": 17645516254.0,
       "total_score": 31.8,
       "scores": {
         "MACD": 0,
@@ -530,7 +514,7 @@
       "name": "000988",
       "price": 147.56,
       "change_pct": 7.9523,
-      "turnover": 15301697.344,
+      "turnover": 15301697344.0,
       "total_score": 48.0,
       "scores": {
         "MACD": 70,
