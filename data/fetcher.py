@@ -422,9 +422,12 @@ def _truncate_to_date(df, date_str):
 def _fetch_via_tushare(date_str):
     """用Tushare获取历史全市场行情（成交额排名）。只含上证+深证，排除688科创板。"""
     import tushare as ts
-    # 转换日期格式 2026-05-11 -> 20260511
+    token = os.environ.get('TUSHARE_TOKEN', '')
+    if not token:
+        print("⚠️ 未设置 TUSHARE_TOKEN 环境变量，无法使用Tushare接口")
+        return pd.DataFrame()
     trade_date = date_str.replace('-', '')
-    pro = ts.pro_api('73becc5913434082458bf51eb65f9966e64b977230f97527cc9f3baf')
+    pro = ts.pro_api(token)
     df = pro.daily(trade_date=trade_date, fields='ts_code,trade_date,open,high,low,close,vol,amount,pct_chg')
     if df is None or len(df) == 0:
         return pd.DataFrame()
