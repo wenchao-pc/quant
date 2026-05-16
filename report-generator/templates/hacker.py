@@ -1,5 +1,5 @@
 """黑客终端风格模板"""
-import json
+from common import change_cls_hacker
 from color_utils import up_down_color, drawdown_color
 
 def render_hacker(data):

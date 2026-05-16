@@ -1,6 +1,5 @@
 """社交卡片风格模板（默认风格）"""
-import html
-import json
+from common import e, threshold_color, stock_status, change_arrow, change_cls, turnover_yi, signal_gap
 from color_utils import up_down_color, drawdown_color
 
 
