@@ -3,11 +3,6 @@ from common import e, threshold_color, stock_status, change_arrow, change_cls, t
 from color_utils import up_down_color, drawdown_color
 
 
-def e(s):
-    """HTML转义，防止XSS"""
-    return html.escape(str(s))
-
-
 def render_social(data):
     date = data['date']
     weekday = data.get('weekday', '')
