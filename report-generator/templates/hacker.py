@@ -1,5 +1,6 @@
 """黑客终端风格模板"""
 import json
+from color_utils import up_down_color, drawdown_color
 
 def render_hacker(data):
     date = data['date']
@@ -17,8 +18,8 @@ def render_hacker(data):
     avg_return = backtest.get('avg_return', 0)
     avg_return_str = backtest.get('avg_return_str', str(avg_return))
     max_drawdown = backtest.get('max_drawdown', 0)
-    bt_ar_cls = 'green' if avg_return > 0 else 'red'
-    bt_md_cls = 'green' if max_drawdown < 0 else 'red'
+    bt_ar_cls = up_down_color(avg_return)
+    bt_md_cls = drawdown_color(max_drawdown)
     
     # 大盘
     market_lines = ''
