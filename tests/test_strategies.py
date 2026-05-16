@@ -298,10 +298,10 @@ class TestVolumePrice:
 # =============================================================================
 class TestConsecutiveUp:
     def test_2_consecutive_days(self):
-        """连涨2天得40分"""
+        """连涨2天得45分"""
         df = make_consec_df(2)
         score, _ = strategy_consecutive_up(df)
-        assert score == 40, f"连涨2天得分为{score}，期望40"
+        assert score == 45, f"连涨2天得分为{score}，期望45"
 
     def test_3_consecutive_days(self):
         """连涨3天得70分"""
@@ -310,28 +310,28 @@ class TestConsecutiveUp:
         assert score == 70, f"连涨3天得分为{score}，期望70"
 
     def test_4_consecutive_days(self):
-        """连涨4天得90分（强势）"""
+        """连涨4天得85分（强势）"""
         df = make_consec_df(4)
         score, info = strategy_consecutive_up(df)
-        assert score == 90, f"连涨4天得分为{score}，期望90"
+        assert score == 85, f"连涨4天得分为{score}，期望85"
         assert '强势' in info.get('signal', '')
 
     def test_5_consecutive_days_no_overwrite(self):
         """
-        连涨5天得50分（注意回调），不是90分。
-        修复前 bug：先命中 consec>=4 得90，又被 consec>=5 覆盖成50。
-        修复后直接命中 consec>=5，得50。
+        连涨5天得75分（强势但注意回调），不是50分。
+        修复前 bug：先命中 consec>=4 得85，又被 consec>=5 覆盖成75。
+        修复后直接命中 consec==5，得75。
         """
         df = make_consec_df(5)
         score, info = strategy_consecutive_up(df)
-        assert score == 50, f"连涨5天bug：得分为{score}，期望50（注意回调）"
+        assert score == 75, f"连涨5天bug：得分为{score}，期望75（注意回调）"
         assert '注意回调' in info.get('signal', '')
 
     def test_6_consecutive_days(self):
-        """连涨6天也得50分（注意回调）"""
+        """连涨6天得60分（注意回调风险）"""
         df = make_consec_df(6)
         score, info = strategy_consecutive_up(df)
-        assert score == 50, f"连涨6天得分为{score}，期望50"
+        assert score == 60, f"连涨6天得分为{score}，期望60"
         assert '注意回调' in info.get('signal', '')
 
     def test_short_data_returns_zero(self):

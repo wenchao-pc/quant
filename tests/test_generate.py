@@ -71,21 +71,22 @@ class TestIsTradingDay:
 
     def test_weekday_not_in_trading_calendar_returns_false(self):
         """工作日但不在交易日历中（如节假日）返回 False"""
+        import baostock as real_bs
         gen = reload_gen()
         mock_dt = MagicMock()
         mock_dt.now.return_value = datetime(2026, 5, 11)  # 周一
         mock_dt.weekday.return_value = 0
 
-        mock_df = MagicMock()
-        col_series = MagicMock()
-        col_series.astype.return_value.tolist.return_value = ['2026-05-08']  # 不包含今天
-        mock_df.__getitem__.side_effect = lambda key: col_series
-        mock_ak = MagicMock()
-        mock_ak.tool_trade_date_hist_sina.return_value = mock_df
-
         with patch.object(gen, 'datetime', mock_dt):
-            with patch.dict('sys.modules', {'akshare': mock_ak}):
-                result = gen.is_trading_day()
+            with patch.object(real_bs, 'query_trade_dates') as mock_qtd:
+                # baostock 返回今天不在交易日历中（非交易日）
+                mock_rs = MagicMock()
+                mock_rs.error_code = '0'
+                mock_rs.next = MagicMock(return_value=False)  # 无数据返回
+                mock_qtd.return_value = mock_rs
+                with patch.object(real_bs, 'login', return_value=mock_rs):
+                    with patch.object(real_bs, 'logout', return_value=None):
+                        result = gen.is_trading_day()
         assert result is False
 
 
@@ -121,32 +122,43 @@ class TestGetTradingDaysCount:
         assert result == 1
 
     def test_skips_weekend(self):
-        """跨周末时正确计算（周一到上周五=1天，中间跳过周末）"""
+        """跨周末时正确计算（周一到上周五=3天）"""
+        import baostock as real_bs
         gen = reload_gen()
-        mock_df = MagicMock()
-        col_series = MagicMock()
-        col_series.astype.return_value.tolist.return_value = ['2026-05-06', '2026-05-09']
-        mock_df.__getitem__.side_effect = lambda key: col_series
-        mock_ak = MagicMock()
-        mock_ak.tool_trade_date_hist_sina.return_value = mock_df
 
-        with patch.dict('sys.modules', {'akshare': mock_ak}):
-            result = gen.get_trading_days_count('2026-05-06', '2026-05-09')
-        assert result == 1
+        with patch.object(real_bs, 'query_trade_dates') as mock_qtd:
+            mock_rs = MagicMock()
+            mock_rs.error_code = '0'
+            mock_rs.next = MagicMock(side_effect=[True, True, True, True, False])
+            mock_rs.get_row_data = MagicMock(side_effect=[
+                ['2026-05-06', '1'], ['2026-05-07', '1'],
+                ['2026-05-08', '1'], ['2026-05-09', '1'],
+            ])
+            mock_qtd.return_value = mock_rs
+            with patch.object(real_bs, 'login', return_value=mock_rs):
+                with patch.object(real_bs, 'logout', return_value=None):
+                    result = gen.get_trading_days_count('2026-05-06', '2026-05-09')
+        assert result == 3  # 5/6被排除，5/7,5/8,5/9共3个交易日
 
     def test_multiple_days_between(self):
         """间隔多个交易日"""
+        import baostock as real_bs
         gen = reload_gen()
-        mock_df = MagicMock()
-        col_series = MagicMock()
-        col_series.astype.return_value.tolist.return_value = ['2026-05-06', '2026-05-07', '2026-05-08', '2026-05-09', '2026-05-11']
-        mock_df.__getitem__.side_effect = lambda key: col_series
-        mock_ak = MagicMock()
-        mock_ak.tool_trade_date_hist_sina.return_value = mock_df
 
-        with patch.dict('sys.modules', {'akshare': mock_ak}):
-            result = gen.get_trading_days_count('2026-05-06', '2026-05-11')
-        assert result == 4  # 5/6到5/11间隔4个日历天（含入场日5/6）
+        with patch.object(real_bs, 'query_trade_dates') as mock_qtd:
+            mock_rs = MagicMock()
+            mock_rs.error_code = '0'
+            mock_rs.next = MagicMock(side_effect=[True, True, True, True, True, False])
+            mock_rs.get_row_data = MagicMock(side_effect=[
+                ['2026-05-06', '1'], ['2026-05-07', '1'],
+                ['2026-05-08', '1'], ['2026-05-09', '1'],
+                ['2026-05-11', '1'],
+            ])
+            mock_qtd.return_value = mock_rs
+            with patch.object(real_bs, 'login', return_value=mock_rs):
+                with patch.object(real_bs, 'logout', return_value=None):
+                    result = gen.get_trading_days_count('2026-05-06', '2026-05-11')
+        assert result == 4  # 5/6被排除，5/7,5/8,5/9,5/11共4个交易日
 
 
 class TestUpdateTracking:

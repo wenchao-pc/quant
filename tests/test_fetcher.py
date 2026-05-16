@@ -137,7 +137,7 @@ class TestGetStockHistory:
         mock_get.assert_not_called()
 
     def test_cache_stale_triggers_fetch(self, tmp_path):
-        """缓存过期时应发起网络请求（新浪API返回空）"""
+        """缓存过期时应发起网络请求（baostock返回空，sina降级返回空）"""
         import data.fetcher as fetcher
 
         cache_dir = tmp_path / 'cache'
@@ -155,14 +155,15 @@ class TestGetStockHistory:
         os.utime(cache_file, (old_mtime, old_mtime))
 
         with patch.object(fetcher, 'CACHE_DIR', str(cache_dir)):
-            with patch.object(fetcher.requests, 'get') as mock_get:
-                mock_response = MagicMock()
-                type(mock_response).text = PropertyMock(return_value='[]')
-                type(mock_response).status_code = PropertyMock(return_value=200)
-                mock_get.return_value = mock_response
-                result = fetcher.get_stock_history('000001')
+            with patch.dict('sys.modules', {'baostock': MagicMock()}):
+                with patch.object(fetcher.requests, 'get') as mock_get:
+                    mock_response = MagicMock()
+                    type(mock_response).text = PropertyMock(return_value='[]')
+                    type(mock_response).status_code = PropertyMock(return_value=200)
+                    mock_get.return_value = mock_response
+                    result = fetcher.get_stock_history('000001')
 
-        # 新浪API返回空JSON []，最终返回空DataFrame
+        # 两级API都失败，最终返回空DataFrame
         assert len(result) == 0
         mock_get.assert_called()
 
