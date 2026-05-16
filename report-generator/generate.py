@@ -242,7 +242,7 @@ def run_and_collect(top_n=80, date_str=None):
                         'price': price, 'change_pct': change_pct, 'turnover': turnover,
                         'scores': {}, 'details': {}
                     })
-            except:
+            except Exception as exc:
                 top10.append({
                     'name': name, 'code': code, 'total_score': 0,
                     'price': price, 'change_pct': change_pct, 'turnover': turnover,
@@ -466,7 +466,7 @@ def update_trading(data):
                 continue
             try:
                 current_price = float(parts[3])
-            except:
+            except (ValueError, IndexError):
                 current_price = 0
             price_map[code_full] = current_price
 
