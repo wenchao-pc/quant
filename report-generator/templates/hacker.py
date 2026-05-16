@@ -8,6 +8,7 @@ def render_hacker(data):
     signals = data.get('signals', [])
     top10 = data.get('top10', [])
     backtest = data.get('backtest', {})
+    generated_at = data.get('generated_at', '')
     signal_count = data.get('signal_count', 0)
     total_scanned = data.get('total_scanned', 0)
     active_analyzed = data.get('active_analyzed', 80)
@@ -267,6 +268,7 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
 </body>
 </html>''' % dict(
         date=date,
+        generated_at=generated_at,
         total_scanned=total_scanned,
         active_analyzed=active_analyzed,
         signal_count=signal_count,
