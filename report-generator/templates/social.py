@@ -11,6 +11,7 @@ def render_social(data):
     backtest = data.get('backtest', {})
     signal_count = data.get('signal_count', 0)
     total_scanned = data.get('total_scanned', 0)
+    threshold = data.get('threshold', 70)
     market = data.get('market', {})
 
     # 回测指标颜色：正数绿色，负数红色
