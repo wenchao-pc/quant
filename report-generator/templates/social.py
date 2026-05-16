@@ -15,8 +15,8 @@ def render_social(data):
     avg_return = backtest.get('avg_return', 0)
     avg_return_str = backtest.get('avg_return_str', str(avg_return))
     max_drawdown = backtest.get('max_drawdown', 0)
-    ar_cls = 'red' if avg_return > 0 else 'green'
-    md_cls = 'red' if max_drawdown < 0 else 'green'
+    ar_cls = 'green' if avg_return > 0 else 'red'
+    md_cls = 'green' if max_drawdown < 0 else 'red'
     
     # 大盘概览小卡
     market_cards = ''

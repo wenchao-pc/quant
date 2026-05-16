@@ -17,8 +17,8 @@ def render_hacker(data):
     avg_return = backtest.get('avg_return', 0)
     avg_return_str = backtest.get('avg_return_str', str(avg_return))
     max_drawdown = backtest.get('max_drawdown', 0)
-    bt_ar_cls = 'red' if avg_return > 0 else 'bright'
-    bt_md_cls = 'bright' if max_drawdown < 0 else 'red'
+    bt_ar_cls = 'green' if avg_return > 0 else 'red'
+    bt_md_cls = 'green' if max_drawdown < 0 else 'red'
     
     # 大盘
     market_lines = ''
