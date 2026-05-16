@@ -284,3 +284,90 @@ class TestSaveJson:
             gen.BASE_DIR = orig_base
             gen.REPORT_DIR = orig_report
             gen.QUANT_DIR = orig_quant
+
+
+class TestRunAndCollect:
+    """run_and_collect() 分支覆盖测试"""
+
+    def test_is_historical_branch_with_date_str(self):
+        """date_str 不为 None 时强制历史模式"""
+        import pandas as pd
+        import data.fetcher as fetcher
+        gen = reload_gen()
+
+        mock_df = pd.DataFrame({
+            '代码': ['000001'], '名称': ['平安银行'],
+            '最新价': [10.0], '涨跌幅': [1.0], '成交额': [1e8],
+        })
+
+        # patch.object(gen, 'get_all_stocks') 不work——gen模块import的是main里的run_daily_screening，
+        # get_top_volume_stocks 来自 data.fetcher，get_all_stocks 也在 data.fetcher，
+        # 所以 patch gen.get_all_stocks 根本不存在。
+        # 正确做法：patch gen.get_top_volume_stocks（gen模块从data.fetcher import的），
+        # 同时 patch gen.run_daily_screening。
+        with patch.object(gen, 'get_top_volume_stocks', return_value=mock_df):
+            with patch.object(gen, 'get_all_stocks', return_value=mock_df):
+                with patch.object(gen, 'run_daily_screening', return_value=[]) as mock_screening:
+                    with patch.object(gen, 'get_market_data', return_value={}):
+                        with patch.object(gen, 'get_backtest_stats', return_value={}):
+                            data = gen.run_and_collect(top_n=10, date_str='2026-05-06')
+
+        assert data['date'] == '2026-05-06'
+        mock_screening.assert_called_once_with(top_n=10, date_str='2026-05-06')
+
+    def test_is_historical_branch_without_date_str(self):
+        """date_str 为 None 且 _should_use_today 返回 False 时走历史模式"""
+        import pandas as pd
+        from datetime import datetime as dt
+        gen = reload_gen()
+
+        mock_df = pd.DataFrame({
+            '代码': ['000001'], '名称': ['平安银行'],
+            '最新价': [10.0], '涨跌幅': [1.0], '成交额': [1e8],
+        })
+
+        mock_dt = MagicMock()
+        mock_dt.now.return_value = dt(2026, 5, 8, 10, 0)
+        mock_dt.hour = 10
+        mock_dt.minute = 0
+
+        with patch.object(gen, 'datetime', mock_dt):
+            with patch.object(gen, '_should_use_today', return_value=False):
+                with patch.object(gen, '_get_previous_trading_date', return_value='2026-05-07'):
+                    with patch.object(gen, 'get_top_volume_stocks', return_value=mock_df):
+                        with patch.object(gen, 'get_all_stocks', return_value=mock_df):
+                            with patch.object(gen, 'run_daily_screening', return_value=[]) as mock_screening:
+                                with patch.object(gen, 'get_market_data', return_value={}):
+                                    with patch.object(gen, 'get_backtest_stats', return_value={}):
+                                        data = gen.run_and_collect(top_n=10, date_str=None)
+
+        assert data['date'] == '2026-05-07'
+
+    def test_top10_includes_analyzed_stocks(self):
+        """Top10 中包含已在 results 中的股票（使用 found 而非重新分析）"""
+        import pandas as pd
+        gen = reload_gen()
+
+        analyzed = [
+            {
+                'code': '000001', 'name': '平安银行', 'total_score': 85,
+                'price': 10.0, 'change_pct': 1.0, 'turnover': 1e8,
+                'scores': {}, 'details': {}
+            }
+        ]
+
+        mock_df = pd.DataFrame({
+            '代码': ['000001'], '名称': ['平安银行'],
+            '最新价': [10.0], '涨跌幅': [1.0], '成交额': [1e8],
+        })
+
+        with patch.object(gen, 'get_top_volume_stocks', return_value=mock_df):
+            with patch.object(gen, 'get_all_stocks', return_value=mock_df):
+                with patch.object(gen, 'run_daily_screening', return_value=analyzed):
+                    with patch.object(gen, 'get_market_data', return_value={}):
+                        with patch.object(gen, 'get_backtest_stats', return_value={}):
+                            data = gen.run_and_collect(top_n=10, date_str='2026-05-06')
+
+        top0 = next((s for s in data['top10'] if s['code'] == '000001'), None)
+        assert top0 is not None
+        assert top0['total_score'] == 85
