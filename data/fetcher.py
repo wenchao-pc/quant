@@ -96,9 +96,6 @@ def get_report_date():
         return prev
 
 
-def _cache_path(name):
-    return os.path.join(os.path.dirname(__file__), '..', 'cache', name)
-
 CACHE_DIR = os.path.join(os.path.dirname(__file__), '..', 'cache')
 os.makedirs(CACHE_DIR, exist_ok=True)
 
