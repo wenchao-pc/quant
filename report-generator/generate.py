@@ -7,7 +7,22 @@ import sys
 import os
 import json
 import time
+import tempfile
 from datetime import datetime
+
+
+def atomic_json_write(obj, path):
+    """原子写入JSON：先写临时文件再rename，防止进程崩溃损坏数据"""
+    dir_path = os.path.dirname(path) or '.'
+    fd, tmp = tempfile.mkstemp(dir=dir_path, suffix='.tmp')
+    try:
+        with os.fdopen(fd, 'w', encoding='utf-8') as f:
+            json.dump(obj, f, ensure_ascii=False, indent=2)
+        os.replace(tmp, path)
+    except Exception:
+        if os.path.exists(tmp):
+            os.remove(tmp)
+        raise
 
 # 路径设置
 # report-generator/ 在 quant/ 下，quant-report/ 也在 quant/ 下
@@ -317,10 +332,9 @@ def save_json(data):
     date_dir = os.path.join(REPORT_DIR, 'reports', date_str)
     os.makedirs(date_dir, exist_ok=True)
     json_path = os.path.join(date_dir, 'data.json')
-    with open(json_path, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+    atomic_json_write(data, json_path)
     print(f"✅ JSON: {json_path}")
-    
+
     # 同时保存到quant目录（兼容旧cron）
     compat_path = os.path.join(QUANT_DIR, 'quant_data.json')
     with open(compat_path, 'w', encoding='utf-8') as f:
@@ -509,8 +523,7 @@ def update_trading(data):
     # 按买入日期降序排序，最新的在前面
     tracking['active'].sort(key=lambda x: x['entry_date'], reverse=True)
     
-    with open(tracking_path, 'w', encoding='utf-8') as f:
-        json.dump(tracking, f, ensure_ascii=False, indent=2)
+    atomic_json_write(tracking, tracking_path)
     print(f"✅ Tracking: {tracking_path}")
     
     return tracking_path
@@ -579,8 +592,7 @@ def generate_all(data):
     # 4. 更新主页的report-list.json
     report_list = get_all_reports()
     list_path = os.path.join(REPORT_DIR, 'data', 'report-list.json')
-    with open(list_path, 'w', encoding='utf-8') as f:
-        json.dump(report_list, f, ensure_ascii=False, indent=2)
+    atomic_json_write(report_list, list_path)
     print(f"✅ 报告列表: {list_path}")
     
     return {
