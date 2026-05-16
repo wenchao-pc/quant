@@ -38,7 +38,6 @@ def is_trading_day():
             row = rs.get_row_data()
             if row[1] == '1':
                 is_trading = True
-        bs.logout()
         if not is_trading:
             print(f"⏭️ {today} 非交易日，跳过")
             return False
@@ -46,6 +45,11 @@ def is_trading_day():
     except Exception as e:
         print(f"⚠️ 交易日判断异常: {e}，默认继续运行")
         return True
+    finally:
+        try:
+            bs.logout()
+        except Exception:
+            pass
 
 
 def _should_use_today(now):
@@ -59,6 +63,7 @@ def _should_use_today(now):
     if now.weekday() >= 5:
         return False
 
+    bs = None
     # 用baostock确认是否交易日
     try:
         import baostock as bs
@@ -68,11 +73,16 @@ def _should_use_today(now):
         while (rs.error_code == '0') and rs.next():
             if rs.get_row_data()[1] == '1':
                 is_trading = True
-        bs.logout()
         if not is_trading:
             return False
     except Exception:
         return False
+    finally:
+        if bs is not None:
+            try:
+                bs.logout()
+            except Exception:
+                pass
 
     # 交易日：盘后(>=15:05) → 今日；盘中 → 上一交易日
     return (now.hour + now.minute / 60.0) >= 15.05
@@ -80,6 +90,7 @@ def _should_use_today(now):
 
 def _get_previous_trading_date(today):
     """获取上一个交易日（不含today），用baostock"""
+    bs = None
     try:
         import baostock as bs
         from datetime import timedelta
@@ -89,12 +100,17 @@ def _get_previous_trading_date(today):
         rows = []
         while rs.next():
             rows.append(rs.get_row_data())
-        bs.logout()
         for row in reversed(rows):
             if row[0] < today and row[1] == '1':
                 return row[0]
     except Exception:
         pass
+    finally:
+        if bs is not None:
+            try:
+                bs.logout()
+            except Exception:
+                pass
     # 降级：往前推1-2天（跳过周末）
     from datetime import timedelta
     d = datetime.strptime(today, '%Y-%m-%d')
@@ -315,6 +331,7 @@ def save_json(data):
 
 def get_trading_days_count(entry_date_str, today_str):
     """计算两个日期之间有多少个交易日后（不含入场日，含今天）"""
+    bs = None
     try:
         import baostock as bs
         lg = bs.login()
@@ -324,10 +341,15 @@ def get_trading_days_count(entry_date_str, today_str):
             row = rs.get_row_data()
             if row[1] == '1' and row[0] != entry_date_str:
                 count += 1
-        bs.logout()
         return max(0, count)
     except Exception:
         return 0
+    finally:
+        if bs is not None:
+            try:
+                bs.logout()
+            except Exception:
+                pass
 
 def update_trading(data):
     """更新信号追踪"""
