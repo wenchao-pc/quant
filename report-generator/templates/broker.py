@@ -23,7 +23,7 @@ def render_broker(data):
     market_rows = ''
     for code, m in market.items():
         cls = 'up' if m.get('change_pct', 0) > 0 else 'down'
-        market_rows += f'''<tr><td style="font-weight:bold">{m.get("name","")}</td><td>{m.get("price",0):,.2f}</td><td class="{cls}">{m.get("change_pct",0):+.2f}%</td><td>{m.get("volume",0):,.0f}</td></tr>\n'''
+        market_rows += f'''<tr><td style="font-weight:bold">{e(m.get("name",""))}</td><td>{m.get("price",0):,.2f}</td><td class="{cls}">{m.get("change_pct",0):+.2f}%</td><td>{m.get("volume",0):,.0f}</td></tr>\n'''
     
     # 信号状态
     if signal_count > 0:
@@ -31,14 +31,14 @@ def render_broker(data):
     else:
         top_score = max((t.get('total_score', 0) for t in top10), default=0)
         top_name = next((t['name'] for t in top10 if t.get('total_score', 0) == top_score), '')
-        signal_html = f'''<div class="signal-box no-signal"><div style="font-size:16px;font-weight:bold;color:#52c41a">🛡️ 今日无买入信号</div><p style="margin:8px 0 0;color:#666">全市场{total_scanned}只股票中，成交额前{active_analyzed}只活跃股得分均未达到70分阈值。</p><p style="margin:4px 0 0;color:#666">最高分：{top_name} {top_score}分 | 回测胜率63.6%，宁缺毋滥。</p></div>'''
+        signal_html = f'''<div class="signal-box no-signal"><div style="font-size:16px;font-weight:bold;color:#52c41a">🛡️ 今日无买入信号</div><p style="margin:8px 0 0;color:#666">全市场{total_scanned}只股票中，成交额前{active_analyzed}只活跃股得分均未达到70分阈值。</p><p style="margin:4px 0 0;color:#666">最高分：{e(top_name)} {top_score}分 | 回测胜率63.6%，宁缺毋滥。</p></div>'''
     
     # 信号股表格
     signal_rows = ''
     for i, s in enumerate(signals[:10]):
         change_cls = 'up' if s['change_pct'] > 0 else 'down'
         turnover_yi = s['turnover'] / 1e8
-        signal_rows += f'''<tr class="highlight"><td style="font-weight:bold">{s['name']}({s['code']})</td><td style="color:#c00;font-weight:bold">{s['total_score']}</td><td class="{change_cls}">{s['change_pct']:+.2f}%</td><td>{s['price']:.2f}</td><td>{turnover_yi:.1f}亿</td><td style="color:#c00">✅买入</td></tr>\n'''
+        signal_rows += f'''<tr class="highlight"><td style="font-weight:bold">{e(s['name'])}({e(s['code'])})</td><td style="color:#c00;font-weight:bold">{s['total_score']}</td><td class="{change_cls}">{s['change_pct']:+.2f}%</td><td>{s['price']:.2f}</td><td>{turnover_yi:.1f}亿</td><td style="color:#c00">✅买入</td></tr>\n'''
     
     # Top10表格
     top10_rows = ''
@@ -48,7 +48,7 @@ def render_broker(data):
         score_color = '#c00' if t['total_score'] >= 60 else '#f60' if t['total_score'] >= 40 else '#999'
         status = '接近' if t['total_score'] >= 55 else '观望'
         status_color = '#f60' if status == '接近' else '#999'
-        top10_rows += f'''<tr><td>{i+1}</td><td style="font-weight:bold">{t['name']}</td><td style="color:{score_color}">{t['total_score']}</td><td class="{change_cls}">{t['change_pct']:+.2f}%</td><td>{turnover_yi:.1f}亿</td><td style="color:{status_color}">{status}</td></tr>\n'''
+        top10_rows += f'''<tr><td>{i+1}</td><td style="font-weight:bold">{e(t['name'])}</td><td style="color:{score_color}">{t['total_score']}</td><td class="{change_cls}">{t['change_pct']:+.2f}%</td><td>{turnover_yi:.1f}亿</td><td style="color:{status_color}">{status}</td></tr>\n'''
     
     # 接近阈值排行（按得分排序top5，<70分的）
     near_rows = ''
@@ -121,7 +121,7 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
 </div>
 <div class="container">
 <h1>📈 <span>量化日报</span> | {date} {weekday}</h1>
-<p style="color:#666;font-size:12px;margin:2px 0">生成时间: {data.get('generated_at','')}</p>
+<p style="color:#666;font-size:12px;margin:2px 0">生成时间: {e(data.get('generated_at',''))}</p>
 
 <div class="section">
 <div class="section-title">📊 大盘概览</div>

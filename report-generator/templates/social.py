@@ -1,6 +1,13 @@
 """社交卡片风格模板（默认风格）"""
+import html
 import json
 from color_utils import up_down_color, drawdown_color
+
+
+def e(s):
+    """HTML转义，防止XSS"""
+    return html.escape(str(s))
+
 
 def render_social(data):
     date = data['date']
@@ -23,7 +30,7 @@ def render_social(data):
     market_cards = ''
     for code, m in market.items():
         cls = 'up' if m.get('change_pct', 0) >= 0 else 'down'
-        market_cards += f'''<div class="index-card"><div class="index-name">{m.get("name","")}</div><div class="index-price">{m.get("price",0):,.2f}</div><div class="index-change {cls}">{m.get("change_pct",0):+.2f}%</div></div>\n'''
+        market_cards += f'''<div class="index-card"><div class="index-name">{e(m.get("name",""))}</div><div class="index-price">{m.get("price",0):,.2f}</div><div class="index-change {cls}">{m.get("change_pct",0):+.2f}%</div></div>\n'''
     
     # 信号大卡
     if signal_count > 0:
@@ -31,7 +38,7 @@ def render_social(data):
         signal_card = f'''<div class="signal-card signal-yes">
 <div class="signal-icon">🎯</div>
 <div class="signal-title" style="color:#00e676">今日发现 <b>{signal_count}</b> 只强势股</div>
-<div class="signal-desc">最高分：<b>{best['name']}</b> {best['total_score']}分 | 得分≥70才推送</div>
+<div class="signal-desc">最高分：<b>{e(best['name'])}</b> {best['total_score']}分 | 得分≥70才推送</div>
 </div>'''
     else:
         top_score = max((t.get('total_score', 0) for t in top10), default=0)
@@ -41,7 +48,7 @@ def render_social(data):
 <div class="signal-title">今日空仓</div>
 <div class="signal-desc">
 全市场{total_scanned}只股票扫描完毕<br>
-最高分{top_score}（{top_name}），未达70分阈值<br>
+最高分{top_score}（{e(top_name)}），未达70分阈值<br>
 <b style="color:rgba(255,255,255,.8)">不操作 = 最好的操作</b>
 </div>
 </div>'''
@@ -57,11 +64,11 @@ def render_social(data):
         for strat, score in s.get('scores', {}).items():
             if score > 0:
                 tag_cls = 'tag-green' if score >= 20 else 'tag'
-                tags += f'<span class="tag {tag_cls}">{strat} ✓</span>'
+                tags += f'<span class="tag {tag_cls}">{e(strat)} ✓</span>'
         
         signal_cards += f'''<div class="stock-card">
 <div class="stock-top">
-<div class="stock-info"><h3>{s['name']}</h3><span>{s['code']}</span></div>
+<div class="stock-info"><h3>{e(s['name'])}</h3><span>{e(s['code'])}</span></div>
 <div class="score-ring {score_cls}">{s['total_score']}</div>
 </div>
 <div class="progress-bar"><div class="progress-fill" style="width:{min(s['total_score'],100)}%"></div></div>
@@ -86,7 +93,7 @@ def render_social(data):
         
         near_cards += f'''<div class="stock-card">
 <div class="stock-top">
-<div class="stock-info"><h3>{s['name']}</h3><span>{s['code']}</span></div>
+<div class="stock-info"><h3>{e(s['name'])}</h3><span>{e(s['code'])}</span></div>
 <div class="score-ring {score_cls}">{s['total_score']}</div>
 </div>
 <div class="progress-bar"><div class="progress-fill" style="width:{min(s['total_score'],100)}%"></div></div>
@@ -110,7 +117,7 @@ def render_social(data):
         status_color = '#ffd740' if status == '接近' else 'rgba(255,255,255,.2)'
         top10_cards += f'''<div class="stock-card" style="padding:10px 14px">
 <div style="display:flex;justify-content:space-between;align-items:center">
-<div><span style="color:rgba(255,255,255,.3);font-size:11px;margin-right:6px">#{i+1}</span><b>{t['name']}</b> <span class="muted">{t['code']}</span></div>
+<div><span style="color:rgba(255,255,255,.3);font-size:11px;margin-right:6px">#{i+1}</span><b>{e(t['name'])}</b> <span class="muted">{e(t['code'])}</span></div>
 <div style="text-align:right"><span style="color:{score_color};font-weight:700">{t['total_score']}</span> <span style="color:{status_color};font-size:11px">{status}</span></div>
 </div>
 <div class="stock-meta" style="margin-top:4px">
@@ -214,7 +221,7 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
 <h2>量化日报</h2>
 <p>多因子评分 · 只推高置信度信号</p>
 <div class="date-tag">{date} {weekday}</div>
-<p style="font-size:11px;color:rgba(255,255,255,.4);margin-top:4px">生成: {data.get('generated_at','')}</p>
+<p style="font-size:11px;color:rgba(255,255,255,.4);margin-top:4px">生成: {e(data.get('generated_at',''))}</p>
 </div>
 
 <div class="section-label">📊 大盘</div>
