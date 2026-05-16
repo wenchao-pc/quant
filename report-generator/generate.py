@@ -276,6 +276,7 @@ def run_and_collect(top_n=80, date_str=None):
         'generated_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
         'total_scanned': len(get_all_stocks(date_str=date_str)),
         'active_analyzed': top_n,
+        'threshold': 70,
         'signal_count': len(results),
         'market': market,
         'signals': results,

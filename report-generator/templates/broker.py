@@ -11,6 +11,7 @@ def render_broker(data):
     signal_count = data.get('signal_count', 0)
     total_scanned = data.get('total_scanned', 0)
     active_analyzed = data.get('active_analyzed', 80)
+    threshold = data.get('threshold', 70)
 
     # 回测指标颜色
     avg_return = backtest.get('avg_return', 0)
@@ -27,11 +28,11 @@ def render_broker(data):
     
     # 信号状态
     if signal_count > 0:
-        signal_html = f'''<div class="signal-box"><div style="font-size:16px;font-weight:bold;color:#c00">🎯 今日{signal_count}只股票达标（≥70分）</div><p style="margin:8px 0 0;color:#666">建议关注以下信号股，结合大盘趋势和个人判断操作。</p></div>'''
+        signal_html = f'''<div class="signal-box"><div style="font-size:16px;font-weight:bold;color:#c00">🎯 今日{signal_count}只股票达标（≥{threshold}分）</div><p style="margin:8px 0 0;color:#666">建议关注以下信号股，结合大盘趋势和个人判断操作。</p></div>'''
     else:
         top_score = max((t.get('total_score', 0) for t in top10), default=0)
         top_name = next((t['name'] for t in top10 if t.get('total_score', 0) == top_score), '')
-        signal_html = f'''<div class="signal-box no-signal"><div style="font-size:16px;font-weight:bold;color:#52c41a">🛡️ 今日无买入信号</div><p style="margin:8px 0 0;color:#666">全市场{total_scanned}只股票中，成交额前{active_analyzed}只活跃股得分均未达到70分阈值。</p><p style="margin:4px 0 0;color:#666">最高分：{e(top_name)} {top_score}分 | 回测胜率63.6%，宁缺毋滥。</p></div>'''
+        signal_html = f'''<div class="signal-box no-signal"><div style="font-size:16px;font-weight:bold;color:#52c41a">🛡️ 今日无买入信号</div><p style="margin:8px 0 0;color:#666">全市场{total_scanned}只股票中，成交额前{active_analyzed}只活跃股得分均未达到{threshold}分阈值。</p><p style="margin:4px 0 0;color:#666">最高分：{e(top_name)} {top_score}分 | 回测胜率63.6%，宁缺毋滥。</p></div>'''
     
     # 信号股表格
     signal_rows = ''
@@ -50,15 +51,15 @@ def render_broker(data):
         status_color = '#f60' if status == '接近' else '#999'
         top10_rows += f'''<tr><td>{i+1}</td><td style="font-weight:bold">{e(t['name'])}</td><td style="color:{score_color}">{t['total_score']}</td><td class="{change_cls}">{t['change_pct']:+.2f}%</td><td>{turnover_yi:.1f}亿</td><td style="color:{status_color}">{status}</td></tr>\n'''
     
-    # 接近阈值排行（按得分排序top5，<70分的）
+    # 接近阈值排行（按得分排序top5，<{threshold}分的）
     near_rows = ''
     near_sorted = sorted(top10, key=lambda x: x.get('total_score', 0), reverse=True)[:5]
     for s in near_sorted:
-        if s.get('total_score', 0) >= 70:
+        if s.get('total_score', 0) >= threshold:
             continue
         change_cls = 'up' if s['change_pct'] > 0 else 'down'
         turnover_yi = s['turnover'] / 1e8
-        gap = 70 - s['total_score']
+        gap = threshold - s['total_score']
         score_color = '#c00' if s['total_score'] >= 60 else '#f60' if s['total_score'] >= 40 else '#999'
         near_rows += f'<tr><td style="font-weight:bold">{s["name"]}({s["code"]})</td><td style="color:{score_color};font-weight:bold">{s["total_score"]}</td><td class="{change_cls}">{s["change_pct"]:+.2f}%</td><td>{turnover_yi:.1f}亿</td><td>差{gap:.0f}分</td></tr>\n'
     return f'''<!DOCTYPE html>
@@ -132,7 +133,7 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
 </div>
 
 <div class="section">
-<div class="section-title">🎯 今日选股信号（阈值≥70分）</div>
+<div class="section-title">🎯 今日选股信号（阈值≥{threshold}分）</div>
 {signal_html}
     {"<table><tr><th>股票</th><th>得分</th><th>涨跌幅</th><th>价格</th><th>成交额</th><th>操作</th></tr>" + signal_rows + "</table>" if signals else ""}
 </div>
@@ -156,7 +157,7 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
 <div class="section">
 <div class="section-title">📊 策略回测表现</div>
 <div class="stat-grid">
-<div class="stat-card"><div class="val">{backtest.get("win_rate",0)}%</div><div class="label">信号胜率(≥70)</div></div>
+<div class="stat-card"><div class="val">{backtest.get("win_rate",0)}%</div><div class="label">信号胜率(≥{threshold})</div></div>
 <div class="stat-card"><div class="val" style="{ar_color}">{avg_return_str}%</div><div class="label">平均每笔收益</div></div>
 <div class="stat-card"><div class="val">{backtest.get("sharpe",0)}</div><div class="label">夏普比率</div></div>
 <div class="stat-card"><div class="val" style="{md_color}">{max_drawdown}%</div><div class="label">最大回撤</div></div>
@@ -175,7 +176,7 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
 </div>
 
 <div class="footer">
-⚠️ 仅供参考，不构成投资建议 | 量化选股系统 v2.0 | 多因子评分≥70<br>
+⚠️ 仅供参考，不构成投资建议 | 量化选股系统 v2.0 | 多因子评分≥{threshold}<br>
 每个交易日15:30自动更新 | <a href="../../index.html">🏠 返回主页</a>
 </div>
 </div>

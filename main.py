@@ -486,7 +486,7 @@ def analyze_stock(code, name, price, change_pct, turnover, date_str=None):
     }
 
 
-def run_daily_screening(top_n=80, date_str=None):
+def run_daily_screening(top_n=80, date_str=None, THRESHOLD=70):
     """每日选股主函数"""
     start_time = time.time()
     print(f"{'='*60}")
@@ -517,7 +517,7 @@ def run_daily_screening(top_n=80, date_str=None):
         
         try:
             result = analyze_stock(code, name, price, change_pct, turnover, date_str=date_str)
-            if result and result['total_score'] >= 70:
+            if result and result['total_score'] >= THRESHOLD:
                 results.append(result)
                 print(f" ✅ 得分:{result['total_score']}")
             else:

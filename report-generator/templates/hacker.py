@@ -13,6 +13,7 @@ def render_hacker(data):
     signal_count = data.get('signal_count', 0)
     total_scanned = data.get('total_scanned', 0)
     active_analyzed = data.get('active_analyzed', 80)
+    threshold = data.get('threshold', 70)
 
     # 回测指标颜色（hacker风格：涨=red，跌=bright）
     avg_return = backtest.get('avg_return', 0)
@@ -48,25 +49,25 @@ def render_hacker(data):
   |   <span class="red">&#9889; %d SIGNAL(S) DETECTED</span>              |
   |                                         |
   |   Top Signal: <span class="yellow">%s %dpts</span>       |
-  |   Threshold:  70.0 pts                  |
+  |   Threshold:  %2.1f pts                  |
   |   Action:     <span class="red">MONITOR &amp; PREPARE</span>              |
   |                                         |
-  +-----------------------------------------+''' % (signal_count, best['name'], best['total_score'])
+  +-----------------------------------------+''' % (signal_count, best['name'], best['total_score'], threshold)
     else:
         top_score = max((t.get('total_score', 0) for t in top10), default=0)
         top_name = next((t['name'] for t in top10 if t.get('total_score', 0) == top_score), '')
-        gap = 70 - top_score
+        gap = threshold - top_score
         signal_box = '''  +-----------------------------------------+
   |                                         |
   |   <span class="signal-safe">&#10003; CLEAR - NO ACTION REQUIRED</span>         |
   |                                         |
   |   Highest score: <span class="yellow">%.1f</span> (%s)        |
-  |   Threshold:    70.0                    |
+  |   Threshold:    %2.1f                    |
   |   Gap:          %.1f pts                 |
   |                                         |
   |   <span class="dim">"不操作就是最好的操作"</span>              |
   |                                         |
-  +-----------------------------------------+''' % (top_score, top_name, gap)
+  +-----------------------------------------+''' % (top_score, top_name, threshold, gap)
     
     # 信号股表格
     signal_table = ''
@@ -196,7 +197,7 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
 <span class="dim">[SCAN]</span> Strategy 3: Consecutive Rally ..... <span class="bright">DONE</span>
 <span class="dim">[SCAN]</span> Strategy 4: Support Bounce ........ <span class="bright">DONE</span>
 <span class="dim">[SCAN]</span> ─────────────────────────────────────────
-<span class="dim">[SCAN]</span> Results: <span class="yellow">%(signal_count)d signals &ge; 70</span> | <span class="bright">%(active_analyzed)d stocks scored</span>
+<span class="dim">[SCAN]</span> Results: <span class="yellow">%(signal_count)d signals &ge; %2.1f</span> | <span class="bright">%(active_analyzed)d stocks scored</span>
 
 %(signal_box)s
 </pre>
@@ -206,7 +207,7 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
 <div class="box-title">&#9656; TOP 5 SCORES</div>
 <pre>
 %(bar_lines)s                 +──────────────────────────────────────────+
-                 0        20        40        60      <span class="red">70 THRESHOLD</span>
+                 0        20        40        60      <span class="red">%2.1f THRESHOLD</span>
 </pre>
 </div>
 
@@ -227,7 +228,7 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
   │  Period:    %(bt_period)s              │
   │  Trades:    <span class="white">%(bt_trades)d</span>              │
   │                                                         │
-  │  Win Rate (&ge;70):  <span class="bright">%(bt_wr)5.1f%%</span>  ████████████████░░░░░░░  │
+  │  Win Rate (&ge;%2.1f):  <span class="bright">%(bt_wr)5.1f%%</span>  ████████████████░░░░░░░  │
   │  Avg Return:      <span class="%(bt_ar_cls)s">%(avg_return_str)s%%</span> per trade                    │
   │  Sharpe Ratio:    <span class="cyan">%(bt_sh)5.2f</span>                                  │
   │  Max Drawdown:    <span class="%(bt_md_cls)s">%(bt_md)5.2f%%</span>                                │
@@ -260,7 +261,7 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
 
 <p class="dim">═══════════════════════════════════════════════════════════════</p>
 <div class="footer">
-<span class="dim">[EOF]</span> Quant System v2.0 | Tencent+Sina API | MultiFactor &ge;70<br>
+<span class="dim">[EOF]</span> Quant System v2.0 | Tencent+Sina API | MultiFactor &ge;%2.1f<br>
 <span class="dim">[DISCLAIMER]</span> 仅供参考，不构成投资建议。<br>
 <span class="dim">[NEXT]</span> 下个交易日 15:30 CST | <a href="../../index.html" style="color:#0a6b0a">[HOME]</a> <span class="cursor">█</span>
 </div>
@@ -292,6 +293,7 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
         bt_pf=backtest.get('profit_factor', 0),
         bt_ann=backtest.get('annualized', 0),
         bt_sc=backtest.get('signal_count', 0),
+        threshold=threshold,
     )
-    
+
     return html

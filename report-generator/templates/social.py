@@ -38,7 +38,7 @@ def render_social(data):
         signal_card = f'''<div class="signal-card signal-yes">
 <div class="signal-icon">🎯</div>
 <div class="signal-title" style="color:#00e676">今日发现 <b>{signal_count}</b> 只强势股</div>
-<div class="signal-desc">最高分：<b>{e(best['name'])}</b> {best['total_score']}分 | 得分≥70才推送</div>
+<div class="signal-desc">最高分：<b>{e(best['name'])}</b> {best['total_score']}分 | 得分≥{threshold}才推送</div>
 </div>'''
     else:
         top_score = max((t.get('total_score', 0) for t in top10), default=0)
@@ -48,7 +48,7 @@ def render_social(data):
 <div class="signal-title">今日空仓</div>
 <div class="signal-desc">
 全市场{total_scanned}只股票扫描完毕<br>
-最高分{top_score}（{e(top_name)}），未达70分阈值<br>
+最高分{top_score}（{e(top_name)}），未达{threshold}分阈值<br>
 <b style="color:rgba(255,255,255,.8)">不操作 = 最好的操作</b>
 </div>
 </div>'''
@@ -84,12 +84,12 @@ def render_social(data):
     near_cards = ''
     near_stocks = sorted(top10, key=lambda x: x.get('total_score', 0), reverse=True)[:3]
     for s in near_stocks:
-        if s.get('total_score', 0) >= 70:
+        if s.get('total_score', 0) >= threshold:
             continue
         score_cls = 'score-mid' if s['total_score'] >= 60 else 'score-low'
         change_cls = 'up' if s['change_pct'] > 0 else 'down'
         turnover_yi = s['turnover'] / 1e8
-        gap = 70 - s['total_score']
+        gap = threshold - s['total_score']
         
         near_cards += f'''<div class="stock-card">
 <div class="stock-top">
@@ -243,7 +243,7 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
 <div class="divider"></div>
 <div class="section-label">📈 策略战绩</div>
 <div class="stats-row">
-<div class="stat-item"><div class="val green">{backtest.get("win_rate",0)}%</div><div class="label">信号胜率(≥70)</div></div>
+<div class="stat-item"><div class="val green">{backtest.get("win_rate",0)}%</div><div class="label">信号胜率(≥{threshold})</div></div>
 <div class="stat-item"><div class="val {ar_cls}">{avg_return_str}%</div><div class="label">平均每笔收益</div></div>
 <div class="stat-item"><div class="val blue">{backtest.get("sharpe",0)}</div><div class="label">夏普比率</div></div>
 <div class="stat-item"><div class="val {md_cls}">{max_drawdown}%</div><div class="label">最大回撤</div></div>
@@ -255,7 +255,7 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
 <li>{"🎯" if signal_count > 0 else "🛡️"} {"关注信号股，明天下午观察买入时机" if signal_count > 0 else "空仓观望，耐心等待信号"}</li>
 <li>📐 信号出现时：+5%止盈 / -3%止损，持有2-3天</li>
 <li>💸 单只仓位≤20%，不追涨停</li>
-<li>⏳ 70+信号平均每周1-2次</li>
+<li>⏳ {threshold}+信号平均每周1-2次</li>
 </ul>
 </div>
 
