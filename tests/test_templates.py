@@ -174,6 +174,14 @@ class TestBrokerTemplate:
         html = render_broker(data)
         assert '70' in html
 
+    def test_threshold_integer_no_trailing_decimals(self):
+        """threshold=70 整数不应显示为 70.0"""
+        from templates.broker import render_broker
+        data = make_data(threshold=70, signal_count=0)
+        html = render_broker(data)
+        # broker 用 f-string，会直接显示 70（不需转义）
+        assert '70.0' not in html or '70' in html
+
     def test_near_threshold_section(self):
         """接近阈值排行正确渲染"""
         from templates.broker import render_broker
@@ -181,6 +189,44 @@ class TestBrokerTemplate:
         data = make_data(threshold=70, top10=[top], signals=[])
         html = render_broker(data)
         assert '接近阈值' in html or '差' in html
+
+    def test_empty_top10_does_not_crash(self):
+        """top10为空时不应崩溃"""
+        from templates.broker import render_broker
+        data = make_data(threshold=70, signal_count=0, signals=[], top10=[])
+        html = render_broker(data)
+        assert html.startswith('<!DOCTYPE html>')
+        assert '无买入信号' in html
+
+    def test_multiple_signals_all_shown(self):
+        """多个信号股全部出现在表格中"""
+        from templates.broker import render_broker
+        stocks = [make_stock(score=75+i) for i in range(5)]
+        data = make_data(threshold=70, signal_count=5, signals=stocks)
+        html = render_broker(data)
+        # 5个信号都在表格里
+        for s in stocks:
+            assert s['name'] in html, f"信号股 {s['name']} 未出现在表格"
+
+    def test_backtest_stats_all_present(self):
+        """回测统计完整渲染"""
+        from templates.broker import render_broker
+        data = make_data()
+        html = render_broker(data)
+        for key in ['胜率', '夏普', '最大回撤', '年化']:
+            assert key in html, f"回测字段 '{key}' 缺失"
+
+    def test_market_multiple_indices(self):
+        """多指数大盘正确渲染"""
+        from templates.broker import render_broker
+        data = make_data(market={
+            'sh000001': {'name': '上证指数', 'price': 3100.0, 'change_pct': 0.5},
+            'sz399001': {'name': '深证成指', 'price': 10000.0, 'change_pct': -0.3},
+            'cy399006': {'name': '创业板', 'price': 2000.0, 'change_pct': 1.2},
+        })
+        html = render_broker(data)
+        for name in ['上证指数', '深证成指', '创业板']:
+            assert name in html, f"指数 {name} 未出现在大盘区域"
 
 
 # ─── social 模板测试 ─────────────────────────────────────────────────────────
@@ -206,6 +252,13 @@ class TestSocialTemplate:
         html = render_social(data)
         assert '70' in html
 
+    def test_threshold_integer_no_trailing_decimals(self):
+        """threshold=70 整数不应显示为 70.0"""
+        from templates.social import render_social
+        data = make_data(threshold=70, signal_count=0)
+        html = render_social(data)
+        assert '70.0' not in html
+
     def test_backtest_stats_present(self):
         from templates.social import render_social
         data = make_data()
@@ -219,3 +272,31 @@ class TestSocialTemplate:
         data = make_data(threshold=70, top10=[top], signals=[])
         html = render_social(data)
         assert '差' in html or '达标' in html
+
+    def test_empty_top10_does_not_crash(self):
+        """top10为空时不应崩溃"""
+        from templates.social import render_social
+        data = make_data(threshold=70, signal_count=0, signals=[], top10=[])
+        html = render_social(data)
+        assert html.startswith('<!DOCTYPE html>')
+
+    def test_multiple_signals_all_shown(self):
+        """多个信号股卡片全部显示"""
+        from templates.social import render_social
+        stocks = [make_stock(score=75+i) for i in range(5)]
+        data = make_data(threshold=70, signal_count=5, signals=stocks)
+        html = render_social(data)
+        for s in stocks:
+            assert s['name'] in html
+
+    def test_market_multiple_indices(self):
+        """多指数大盘卡片正确渲染"""
+        from templates.social import render_social
+        data = make_data(market={
+            'sh000001': {'name': '上证指数', 'price': 3100.0, 'change_pct': 0.5},
+            'sz399001': {'name': '深证成指', 'price': 10000.0, 'change_pct': -0.3},
+            'cy399006': {'name': '创业板', 'price': 2000.0, 'change_pct': 1.2},
+        })
+        html = render_social(data)
+        for name in ['上证指数', '深证成指', '创业板']:
+            assert name in html
