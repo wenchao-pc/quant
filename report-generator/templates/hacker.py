@@ -1,5 +1,5 @@
 """黑客终端风格模板"""
-from common import change_cls_hacker
+from .common import change_cls_hacker
 from color_utils import up_down_color, drawdown_color
 
 def render_hacker(data):
@@ -61,7 +61,7 @@ def render_hacker(data):
   |                                         |
   |   <span class="signal-safe">&#10003; CLEAR - NO ACTION REQUIRED</span>         |
   |                                         |
-  |   Highest score: <span class="yellow">%.1f</span> (%s)        |
+  |   Highest score: <span class="yellow">%.1f</span> %s        |
   |   Threshold:    %2.1f                    |
   |   Gap:          %.1f pts                 |
   |                                         |
@@ -197,7 +197,7 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
 <span class="dim">[SCAN]</span> Strategy 3: Consecutive Rally ..... <span class="bright">DONE</span>
 <span class="dim">[SCAN]</span> Strategy 4: Support Bounce ........ <span class="bright">DONE</span>
 <span class="dim">[SCAN]</span> ─────────────────────────────────────────
-<span class="dim">[SCAN]</span> Results: <span class="yellow">%(signal_count)d signals &ge; %2.1f</span> | <span class="bright">%(active_analyzed)d stocks scored</span>
+<span class="dim">[SCAN]</span> Results: <span class="yellow">%(signal_count)d signals &ge; %(threshold).1f</span> | <span class="bright">%(active_analyzed)d stocks scored</span>
 
 %(signal_box)s
 </pre>
@@ -207,7 +207,7 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
 <div class="box-title">&#9656; TOP 5 SCORES</div>
 <pre>
 %(bar_lines)s                 +──────────────────────────────────────────+
-                 0        20        40        60      <span class="red">%2.1f THRESHOLD</span>
+                 0        20        40        60      <span class="red">%(threshold).1f THRESHOLD</span>
 </pre>
 </div>
 
@@ -228,7 +228,7 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
   │  Period:    %(bt_period)s              │
   │  Trades:    <span class="white">%(bt_trades)d</span>              │
   │                                                         │
-  │  Win Rate (&ge;%2.1f):  <span class="bright">%(bt_wr)5.1f%%</span>  ████████████████░░░░░░░  │
+  │  Win Rate (&ge;%(threshold).1f):  <span class="bright">%(bt_wr)5.1f%%</span>  ████████████████░░░░░░░  │
   │  Avg Return:      <span class="%(bt_ar_cls)s">%(avg_return_str)s%%</span> per trade                    │
   │  Sharpe Ratio:    <span class="cyan">%(bt_sh)5.2f</span>                                  │
   │  Max Drawdown:    <span class="%(bt_md_cls)s">%(bt_md)5.2f%%</span>                                │
@@ -261,7 +261,7 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
 
 <p class="dim">═══════════════════════════════════════════════════════════════</p>
 <div class="footer">
-<span class="dim">[EOF]</span> Quant System v2.0 | Tencent+Sina API | MultiFactor &ge;%2.1f<br>
+<span class="dim">[EOF]</span> Quant System v2.0 | Tencent+Sina API | MultiFactor &ge;%(threshold).1f<br>
 <span class="dim">[DISCLAIMER]</span> 仅供参考，不构成投资建议。<br>
 <span class="dim">[NEXT]</span> 下个交易日 15:30 CST | <a href="../../index.html" style="color:#0a6b0a">[HOME]</a> <span class="cursor">█</span>
 </div>

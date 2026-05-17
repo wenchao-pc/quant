@@ -1,5 +1,5 @@
 """券商晨报风格模板"""
-from common import e, threshold_color, stock_status, change_cls, turnover_yi, signal_gap
+from .common import e, threshold_color, stock_status, change_cls, turnover_yi, signal_gap
 
 def render_broker(data):
     date = data['date']

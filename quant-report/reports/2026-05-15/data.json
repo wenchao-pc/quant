@@ -1,9 +1,10 @@
 {
   "date": "2026-05-15",
   "weekday": "周五",
-  "generated_at": "2026-05-16 04:20:03",
+  "generated_at": "2026-05-17 09:26:26",
   "total_scanned": 3464,
   "active_analyzed": 80,
+  "threshold": 70,
   "signal_count": 0,
   "market": {
     "000001": {
