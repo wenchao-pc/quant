@@ -365,13 +365,13 @@ async function loadTracking() {
             const totalSignals = s.total_signals || 0;
             const wins = s.wins || 0;
             
-            if (totalSignals > 0) {
-                // 信号胜率
-                const wr = ((wins / totalSignals) * 100).toFixed(1);
-                document.getElementById('stat-winrate').textContent = wr + '%';
-            }
-            
             if (closed.length > 0) {
+                // 信号胜率：从closed计算，盈利笔数/总笔数
+                const closedReturns = closed.map(c => c.current_return || 0);
+                const closedWins = closedReturns.filter(r => r > 0).length;
+                const wr = ((closedWins / closed.length) * 100).toFixed(1);
+                document.getElementById('stat-winrate').textContent = wr + '%';
+
                 // 平均每笔收益
                 const returns = closed.map(c => c.current_return || 0);
                 const avgRet = (returns.reduce((a,b) => a+b, 0) / returns.length).toFixed(2);
