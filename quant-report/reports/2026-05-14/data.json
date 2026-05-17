@@ -1,31 +1,32 @@
 {
   "date": "2026-05-14",
   "weekday": "周四",
-  "generated_at": "2026-05-15 12:03:39",
+  "generated_at": "2026-05-17 16:52:14",
   "total_scanned": 3962,
   "active_analyzed": 80,
+  "threshold": 70,
   "signal_count": 0,
   "market": {
     "000001": {
       "name": "上证指数",
-      "price": 4183.06,
-      "change_pct": 0.12,
-      "change": 5.14,
-      "volume": 98751562.0
+      "price": 4135.39,
+      "change_pct": -1.02,
+      "change": -42.53,
+      "volume": 151924003.0
     },
     "399001": {
       "name": "深证成指",
-      "price": 15783.18,
-      "change_pct": 0.24,
-      "change": 37.44,
-      "volume": 118282005.0
+      "price": 15561.37,
+      "change_pct": -1.17,
+      "change": -184.37,
+      "volume": 182523617.0
     },
     "399006": {
       "name": "创业板指",
-      "price": 3973.78,
-      "change_pct": 0.57,
-      "change": 22.64,
-      "volume": 56369926.0
+      "price": 3929.06,
+      "change_pct": -0.56,
+      "change": -22.08,
+      "volume": 87651069.0
     }
   },
   "signals": [],
@@ -566,14 +567,17 @@
     }
   ],
   "backtest": {
-    "win_rate": 63.6,
-    "avg_return": 2.66,
-    "sharpe": 2.36,
-    "max_drawdown": -2.72,
-    "profit_factor": 2.46,
-    "annualized": 48.6,
-    "total_trades": 50,
-    "signal_count": 11,
-    "period": "2026.1.9-4.17"
+    "win_rate": 25.0,
+    "avg_return": -1.33,
+    "avg_return_str": "-1.33",
+    "sharpe": -0.59,
+    "max_drawdown": -4.92,
+    "profit_factor": 0.11,
+    "annualized": -66.5,
+    "max_return": 0.68,
+    "total_trades": 4,
+    "signal_count": 6,
+    "total_return": -5.34,
+    "period": "2026-05-11至2026-05-12"
   }
 }
