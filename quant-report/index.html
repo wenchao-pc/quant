@@ -386,7 +386,8 @@ async function loadTracking() {
                 const ddEl = document.getElementById('stat-drawdown');
                 if (ddEl) {
                     ddEl.textContent = worst + '%';
-                    ddEl.className = 'val red';
+                    // 负数回撤→绿色（亏钱），零/正数→红色（无回撤）
+                    ddEl.className = 'val ' + (worst < 0 ? 'down' : 'red');
                 }
                 
                 // 夏普比率（简化：平均收益 / 收益标准差）
