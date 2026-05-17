@@ -10,6 +10,16 @@ import time
 import tempfile
 from datetime import datetime
 
+# 自动加载 .env 环境变量
+_dotenv_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '.env')
+if os.path.exists(_dotenv_path):
+    with open(_dotenv_path) as _f:
+        for _line in _f:
+            _line = _line.strip()
+            if _line and not _line.startswith('#') and '=' in _line:
+                _k, _v = _line.split('=', 1)
+                os.environ.setdefault(_k.strip(), _v.strip())
+
 
 def atomic_json_write(obj, path):
     """原子写入JSON：先写临时文件再rename，防止进程崩溃损坏数据"""
