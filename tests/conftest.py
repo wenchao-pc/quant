@@ -5,8 +5,9 @@ import sys
 import os
 import pytest
 
-# 让 quant/ 能被 import
+# 让 quant/ 能被 import，report-generator 也需要
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'report-generator'))
 
 import pandas as pd
 import numpy as np
