@@ -1,5 +1,6 @@
 """券商晨报风格模板"""
 from .common import e, threshold_color, stock_status, change_cls, turnover_yi, signal_gap
+from color_utils import up_down_color, drawdown_color
 
 def render_broker(data):
     date = data['date']
@@ -13,12 +14,12 @@ def render_broker(data):
     active_analyzed = data.get('active_analyzed', 80)
     threshold = data.get('threshold', 70)
 
-    # 回测指标颜色
+    # 回测指标颜色（A股标准：涨红跌绿）
     avg_return = backtest.get('avg_return', 0)
     avg_return_str = backtest.get('avg_return_str', str(avg_return))
     max_drawdown = backtest.get('max_drawdown', 0)
-    ar_color = 'color:#c00' if avg_return > 0 else 'color:#090'
-    md_color = 'color:#c00' if max_drawdown < 0 else 'color:#090'
+    ar_color = '#c00' if avg_return >= 0 else '#090'  # 正数红，负数绿
+    md_color = '#090' if max_drawdown < 0 else '#c00'  # 回撤为负→绿色（亏），零/正→红色（无回撤）
     
     # 大盘行
     market_rows = ''
@@ -39,7 +40,7 @@ def render_broker(data):
     for i, s in enumerate(signals[:10]):
         chg_cls = change_cls(s['change_pct'])
         turnover_yi_val = turnover_yi(s['turnover'])
-        signal_rows += f'''<tr class="highlight"><td style="font-weight:bold">{e(s['name'])}({e(s['code'])})</td><td style="color:#c00;font-weight:bold">{s['total_score']}</td><td class="{change_cls}">{s['change_pct']:+.2f}%</td><td>{s['price']:.2f}</td><td>{turnover_yi_val}</td><td style="color:#c00">✅买入</td></tr>\n'''
+        signal_rows += f'''<tr class="highlight"><td style="font-weight:bold">{e(s['name'])}({e(s['code'])})</td><td style="color:#c00;font-weight:bold">{s['total_score']}</td><td class="{chg_cls}">{s['change_pct']:+.2f}%</td><td>{s['price']:.2f}</td><td>{turnover_yi_val}</td><td style="color:#c00">✅买入</td></tr>\n'''
     
     # Top10表格
     top10_rows = ''
@@ -134,7 +135,7 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
 <div class="section">
 <div class="section-title">🎯 今日选股信号（阈值≥{threshold}分）</div>
 {signal_html}
-    {"<table><tr><th>股票</th><th>得分</th><th>涨跌幅</th><th>价格</th><th>成交额</th><th>操作</th></tr>" + signal_rows + "</table>" if signals else ""}
+{("<table><tr><th>股票</th><th>得分</th><th>涨跌幅</th><th>价格</th><th>成交额</th><th>操作</th></tr>" + signal_rows + "</table>") if signals else ""}
 </div>
 
 <div class="section">

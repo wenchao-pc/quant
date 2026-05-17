@@ -180,7 +180,7 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
 <p class="dim">═══════════════════════════════════════════════════════════════</p>
 <p><span class="cmd">date</span> <span class="white">%(generated_at)s CST</span></p>
 <p><span class="cmd">uname</span> <span class="white">QuantSystem 2.0 | Python 3.11 | Tencent+Sina API</span></p>
-<p><span class="cmd">wc -l</span> <span class="white">%(total_scanned)d stocks scanned | %(active_analyzed)d active analyzed | 4 strategies</span></p>
+<p><span class="cmd">wc -l</span> <span class="white">%(total_scanned)d stocks scanned | %(active_analyzed)d active analyzed | <span class="white">8 strategies</span></p>
 <p class="dim">═══════════════════════════════════════════════════════════════</p>
 
 <div class="box">
