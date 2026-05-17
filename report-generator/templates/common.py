@@ -39,6 +39,13 @@ def turnover_yi(turnover):
     return f"{turnover / 1e8:.1f}亿"
 
 
+def threshold_color_hacker(score):
+    """得分颜色（hacker风格）"""
+    if score >= 60:
+        return 'yellow'
+    return 'dim'
+
+
 def signal_gap(score, threshold):
     """离达标的差距分值"""
     return max(threshold - score, 0)

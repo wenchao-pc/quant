@@ -24,8 +24,8 @@ def render_social(data):
     # 大盘概览小卡
     market_cards = ''
     for code, m in market.items():
-        cls = 'up' if m.get('change_pct', 0) >= 0 else 'down'
-        market_cards += f'''<div class="index-card"><div class="index-name">{e(m.get("name",""))}</div><div class="index-price">{m.get("price",0):,.2f}</div><div class="index-change {cls}">{m.get("change_pct",0):+.2f}%</div></div>\n'''
+        chg_cls = change_cls(m.get('change_pct', 0))
+        market_cards += f'''<div class="index-card"><div class="index-name">{e(m.get("name",""))}</div><div class="index-price">{m.get("price",0):,.2f}</div><div class="index-change {chg_cls}">{m.get("change_pct",0):+.2f}%</div></div>\n'''
     
     # 信号大卡
     if signal_count > 0:
@@ -51,9 +51,10 @@ def render_social(data):
     # 信号股卡片
     signal_cards = ''
     for i, s in enumerate(signals[:5]):
-        score_cls = 'score-high' if s['total_score'] >= 80 else 'score-mid'
-        change_cls = 'up' if s['change_pct'] > 0 else 'down'
-        turnover_yi = s['turnover'] / 1e8
+        score_cls = threshold_color(s['total_score'])
+        chg_cls = change_cls(s['change_pct'])
+        turnover_yi_val = turnover_yi(s['turnover'])
+        arrow = change_arrow(s['change_pct'])
         
         tags = ''
         for strat, score in s.get('scores', {}).items():
@@ -68,8 +69,8 @@ def render_social(data):
 </div>
 <div class="progress-bar"><div class="progress-fill" style="width:{min(s['total_score'],100)}%"></div></div>
 <div class="stock-meta">
-<span class="{change_cls}">{'▲' if s['change_pct']>0 else '▼'} {s['change_pct']:+.2f}%</span>
-<span class="muted">成交{turnover_yi:.1f}亿</span>
+<span class="{change_cls}">{arrow} {s['change_pct']:+.2f}%</span>
+<span class="muted">成交{turnover_yi_val}</span>
 <span class="muted">¥{s['price']:.2f}</span>
 </div>
 <div class="tags">{tags}</div>
@@ -81,10 +82,11 @@ def render_social(data):
     for s in near_stocks:
         if s.get('total_score', 0) >= threshold:
             continue
-        score_cls = 'score-mid' if s['total_score'] >= 60 else 'score-low'
-        change_cls = 'up' if s['change_pct'] > 0 else 'down'
-        turnover_yi = s['turnover'] / 1e8
-        gap = threshold - s['total_score']
+        score_cls = threshold_color(s['total_score'])
+        chg_cls = change_cls(s['change_pct'])
+        turnover_yi_val = turnover_yi(s['turnover'])
+        arrow = change_arrow(s['change_pct'])
+        gap = signal_gap(s['total_score'], threshold)
         
         near_cards += f'''<div class="stock-card">
 <div class="stock-top">
@@ -93,8 +95,8 @@ def render_social(data):
 </div>
 <div class="progress-bar"><div class="progress-fill" style="width:{min(s['total_score'],100)}%"></div></div>
 <div class="stock-meta">
-<span class="{change_cls}">{'▲' if s['change_pct']>0 else '▼'} {s['change_pct']:+.2f}%</span>
-<span class="muted">成交{turnover_yi:.1f}亿</span>
+<span class="{change_cls}">{arrow} {s['change_pct']:+.2f}%</span>
+<span class="muted">成交{turnover_yi_val}</span>
 <span class="muted">差{gap:.0f}分达标</span>
 </div>
 </div>\n'''
@@ -105,19 +107,17 @@ def render_social(data):
     # 活跃TOP10卡片
     top10_cards = ''
     for i, t in enumerate(top10[:10]):
-        change_cls = 'up' if t['change_pct'] > 0 else 'down'
-        turnover_yi = t['turnover'] / 1e8
-        score_color = '#f093fb' if t['total_score'] >= 60 else 'rgba(255,255,255,.5)'
-        status = '接近' if t['total_score'] >= 55 else '观望'
-        status_color = '#ffd740' if status == '接近' else 'rgba(255,255,255,.2)'
+        chg_cls = change_cls(t['change_pct'])
+        turnover_yi_val = turnover_yi(t['turnover'])
+        status, status_color = stock_status(t['total_score'])
         top10_cards += f'''<div class="stock-card" style="padding:10px 14px">
 <div style="display:flex;justify-content:space-between;align-items:center">
 <div><span style="color:rgba(255,255,255,.3);font-size:11px;margin-right:6px">#{i+1}</span><b>{e(t['name'])}</b> <span class="muted">{e(t['code'])}</span></div>
-<div style="text-align:right"><span style="color:{score_color};font-weight:700">{t['total_score']}</span> <span style="color:{status_color};font-size:11px">{status}</span></div>
+<div style="text-align:right"><span style="color:#f093fb;font-weight:700">{t['total_score']}</span> <span style="color:{status_color};font-size:11px">{status}</span></div>
 </div>
 <div class="stock-meta" style="margin-top:4px">
-<span class="{change_cls}">{'▲' if t['change_pct']>0 else '▼'} {t['change_pct']:+.2f}%</span>
-<span class="muted">成交{turnover_yi:.1f}亿</span>
+<span class="{change_cls}">{change_arrow(t['change_pct'])} {t['change_pct']:+.2f}%</span>
+<span class="muted">成交{turnover_yi_val}</span>
 </div>
 </div>\n'''
     

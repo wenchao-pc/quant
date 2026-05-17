@@ -1,5 +1,5 @@
 """黑客终端风格模板"""
-from .common import change_cls_hacker
+from .common import change_cls_hacker, stock_status, turnover_yi, signal_gap, threshold_color_hacker
 from color_utils import up_down_color, drawdown_color
 
 def render_hacker(data):
@@ -25,11 +25,11 @@ def render_hacker(data):
     # 大盘
     market_lines = ''
     for code, m in market.items():
-        cls = 'red' if m.get('change_pct', 0) >= 0 else 'bright'
+        chg_cls = change_cls_hacker(m.get('change_pct', 0))
         name = m.get("name","")
         price = m.get("price",0)
         chg = m.get("change_pct",0)
-        market_lines += '  <span class="white">%s</span> <span class="cyan">%10.2f</span> <span class="%s">%+7.2f%%</span>\n' % (name, price, cls, chg)
+        market_lines += '  <span class="white">%s</span> <span class="cyan">%10.2f</span> <span class="%s">%+7.2f%%</span>\n' % (name, price, chg_cls, chg)
     
     # ASCII柱状图 TOP5
     bar_lines = ''
@@ -38,7 +38,7 @@ def render_hacker(data):
         score = s.get('total_score', 0)
         filled = int(score / 2.5)
         empty = int((100 - score) / 2.5)
-        color = 'yellow' if score >= 60 else 'dim'
+        color = threshold_color_hacker(score)
         bar_lines += '<span class="white">%s %s</span> |<span class="%s">%s</span><span class="dim">%s</span> %s\n' % (s["name"], s["code"], color, '█'*filled, '░'*empty, score)
     
     # 信号状态框
@@ -56,7 +56,7 @@ def render_hacker(data):
     else:
         top_score = max((t.get('total_score', 0) for t in top10), default=0)
         top_name = next((t['name'] for t in top10 if t.get('total_score', 0) == top_score), '')
-        gap = threshold - top_score
+        gap = signal_gap(top_score, threshold)
         signal_box = '''  +-----------------------------------------+
   |                                         |
   |   <span class="signal-safe">&#10003; CLEAR - NO ACTION REQUIRED</span>         |
@@ -74,9 +74,9 @@ def render_hacker(data):
     if signals:
         rows = ''
         for i, s in enumerate(signals[:10]):
-            change_cls = 'red' if s['change_pct'] > 0 else 'bright'
-            turnover_yi = s['turnover'] / 1e8
-            rows += '<tr><td>%02d</td><td>%s</td><td>%s</td><td class="yellow">%s</td><td class="%s">%+.2f%%</td><td class="white">%.1f</td><td class="red">BUY</td></tr>\n' % (i+1, s["code"], s["name"], s["total_score"], change_cls, s["change_pct"], turnover_yi)
+            chg_cls = change_cls_hacker(s['change_pct'])
+            turnover_yi_val = turnover_yi(s['turnover'])
+            rows += '<tr><td>%02d</td><td>%s</td><td>%s</td><td class="yellow">%s</td><td class="%s">%+.2f%%</td><td class="white">%s</td><td class="red">BUY</td></tr>\n' % (i+1, s["code"], s["name"], s["total_score"], chg_cls, s["change_pct"], turnover_yi_val)
         signal_table = '''<div class="box"><div class="box-title">&#9656; SIGNAL STOCKS</div>
 <table class="term-table"><tr><th>#</th><th>TICKER</th><th>NAME</th><th>SCORE</th><th>CHANGE</th><th>Vol(亿)</th><th>ACTION</th></tr>
 %s</table></div>''' % rows
@@ -85,11 +85,12 @@ def render_hacker(data):
     top10_rows = ''
     for i, t in enumerate(top10[:10]):
         score = t.get('total_score', 0)
-        score_color = 'yellow' if score >= 55 else 'dim'
-        change_cls = 'red' if t['change_pct'] > 0 else 'bright'
-        turnover_yi = t['turnover'] / 1e8
-        status = '<span class="yellow">NEAR</span>' if score >= 55 else '<span class="dim">WAIT</span>'
-        top10_rows += '<tr><td>%02d</td><td>%s</td><td>%s</td><td class="%s">%s</td><td class="%s">%+.2f%%</td><td class="white">%.1f</td><td>%s</td></tr>\n' % (i+1, t["code"], t["name"], score_color, score, change_cls, t["change_pct"], turnover_yi, status)
+        score_color = threshold_color_hacker(score)
+        status_text, _ = stock_status(score)
+        chg_cls = change_cls_hacker(t['change_pct'])
+        turnover_yi_val = turnover_yi(t['turnover'])
+        status = f'<span class="{threshold_color_hacker(score)}">{status_text}</span>'
+        top10_rows += '<tr><td>%02d</td><td>%s</td><td>%s</td><td class="%s">%s</td><td class="%s">%+.2f%%</td><td class="white">%s</td><td>%s</td></tr>\n' % (i+1, t["code"], t["name"], score_color, score, chg_cls, t["change_pct"], turnover_yi_val, status)
     
     # 执行状态
     if signal_count > 0:

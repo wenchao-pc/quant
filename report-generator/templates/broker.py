@@ -23,8 +23,8 @@ def render_broker(data):
     # 大盘行
     market_rows = ''
     for code, m in market.items():
-        cls = 'up' if m.get('change_pct', 0) > 0 else 'down'
-        market_rows += f'''<tr><td style="font-weight:bold">{e(m.get("name",""))}</td><td>{m.get("price",0):,.2f}</td><td class="{cls}">{m.get("change_pct",0):+.2f}%</td><td>{m.get("volume",0):,.0f}</td></tr>\n'''
+        chg_cls = change_cls(m.get('change_pct', 0))
+        market_rows += f'''<tr><td style="font-weight:bold">{e(m.get("name",""))}</td><td>{m.get("price",0):,.2f}</td><td class="{chg_cls}">{m.get("change_pct",0):+.2f}%</td><td>{m.get("volume",0):,.0f}</td></tr>\n'''
     
     # 信号状态
     if signal_count > 0:
@@ -37,19 +37,18 @@ def render_broker(data):
     # 信号股表格
     signal_rows = ''
     for i, s in enumerate(signals[:10]):
-        change_cls = 'up' if s['change_pct'] > 0 else 'down'
-        turnover_yi = s['turnover'] / 1e8
-        signal_rows += f'''<tr class="highlight"><td style="font-weight:bold">{e(s['name'])}({e(s['code'])})</td><td style="color:#c00;font-weight:bold">{s['total_score']}</td><td class="{change_cls}">{s['change_pct']:+.2f}%</td><td>{s['price']:.2f}</td><td>{turnover_yi:.1f}亿</td><td style="color:#c00">✅买入</td></tr>\n'''
+        chg_cls = change_cls(s['change_pct'])
+        turnover_yi_val = turnover_yi(s['turnover'])
+        signal_rows += f'''<tr class="highlight"><td style="font-weight:bold">{e(s['name'])}({e(s['code'])})</td><td style="color:#c00;font-weight:bold">{s['total_score']}</td><td class="{change_cls}">{s['change_pct']:+.2f}%</td><td>{s['price']:.2f}</td><td>{turnover_yi_val}</td><td style="color:#c00">✅买入</td></tr>\n'''
     
     # Top10表格
     top10_rows = ''
     for i, t in enumerate(top10[:10]):
-        change_cls = 'up' if t['change_pct'] > 0 else 'down'
-        turnover_yi = t['turnover'] / 1e8
+        chg_cls = change_cls(t['change_pct'])
+        turnover_yi_val = turnover_yi(t['turnover'])
+        status, status_color = stock_status(t['total_score'])
         score_color = '#c00' if t['total_score'] >= 60 else '#f60' if t['total_score'] >= 40 else '#999'
-        status = '接近' if t['total_score'] >= 55 else '观望'
-        status_color = '#f60' if status == '接近' else '#999'
-        top10_rows += f'''<tr><td>{i+1}</td><td style="font-weight:bold">{e(t['name'])}</td><td style="color:{score_color}">{t['total_score']}</td><td class="{change_cls}">{t['change_pct']:+.2f}%</td><td>{turnover_yi:.1f}亿</td><td style="color:{status_color}">{status}</td></tr>\n'''
+        top10_rows += f'''<tr><td>{i+1}</td><td style="font-weight:bold">{e(t['name'])}</td><td style="color:{score_color}">{t['total_score']}</td><td class="{change_cls}">{t['change_pct']:+.2f}%</td><td>{turnover_yi_val}</td><td style="color:{status_color}">{status}</td></tr>\n'''
     
     # 接近阈值排行（按得分排序top5，<{threshold}分的）
     near_rows = ''
@@ -57,11 +56,11 @@ def render_broker(data):
     for s in near_sorted:
         if s.get('total_score', 0) >= threshold:
             continue
-        change_cls = 'up' if s['change_pct'] > 0 else 'down'
-        turnover_yi = s['turnover'] / 1e8
-        gap = threshold - s['total_score']
+        chg_cls = change_cls(s['change_pct'])
+        turnover_yi_val = turnover_yi(s['turnover'])
+        gap = signal_gap(s['total_score'], threshold)
         score_color = '#c00' if s['total_score'] >= 60 else '#f60' if s['total_score'] >= 40 else '#999'
-        near_rows += f'<tr><td style="font-weight:bold">{s["name"]}({s["code"]})</td><td style="color:{score_color};font-weight:bold">{s["total_score"]}</td><td class="{change_cls}">{s["change_pct"]:+.2f}%</td><td>{turnover_yi:.1f}亿</td><td>差{gap:.0f}分</td></tr>\n'
+        near_rows += f'<tr><td style="font-weight:bold">{s["name"]}({s["code"]})</td><td style="color:{score_color};font-weight:bold">{s["total_score"]}</td><td class="{change_cls}">{s["change_pct"]:+.2f}%</td><td>{turnover_yi_val}</td><td>差{gap:.0f}分</td></tr>\n'
     return f'''<!DOCTYPE html>
 <html lang="zh">
 <head>
