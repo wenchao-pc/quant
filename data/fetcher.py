@@ -410,6 +410,48 @@ def get_stock_history(symbol, days=120, date_str=None):
     return pd.DataFrame()
 
 
+def get_stock_history_batch(symbols, days=120, date_str=None, n_workers=5):
+    """批量获取多只股票的K线，优先从缓存读取，未缓存的用多线程并发查询。
+    symbols: list of stock codes (e.g. ['600000', '000001'])
+    n_workers: 并发线程数，默认10
+    返回: dict {symbol: DataFrame}
+    """
+    result = {}
+
+    # 筛出需要查询的（命中缓存的直接用）
+    need_fetch = []
+    for sym in symbols:
+        cache_name = f'hist_{sym}.csv'
+        cached = _load_cache(cache_name, max_age_hours=12)
+        if cached is not None and len(cached) > 20:
+            truncated = _truncate_to_date(cached, date_str) if date_str else cached
+            if len(truncated) > 20:
+                result[sym] = truncated
+                continue
+        need_fetch.append(sym)
+
+    if not need_fetch:
+        return result
+
+    # 多线程并发查未缓存的
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    def _fetch_one(sym):
+        # 每次thread独立login/logout（baostock非线程安全）
+        df = get_stock_history(sym, days=days, date_str=date_str)
+        return sym, df
+
+    n_workers = min(3, len(need_fetch))
+    with ThreadPoolExecutor(max_workers=n_workers) as executor:
+        futures = {executor.submit(_fetch_one, sym): sym for sym in need_fetch}
+        for future in as_completed(futures):
+            sym, df = future.result()
+            if df is not None and len(df) > 20:
+                result[sym] = df
+
+    return result
+
+
 def _truncate_to_date(df, date_str):
     """将K线数据截断到指定日期（含），确保不会用到未来数据"""
     if date_str and '日期' in df.columns:

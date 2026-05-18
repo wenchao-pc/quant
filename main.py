@@ -486,7 +486,7 @@ def analyze_stock(code, name, price, change_pct, turnover, date_str=None):
     }
 
 
-def run_daily_screening(top_n=80, date_str=None, THRESHOLD=70):
+def run_daily_screening(top_n=40, date_str=None, THRESHOLD=70):
     """每日选股主函数"""
     start_time = time.time()
     print(f"{'='*60}")
@@ -501,11 +501,11 @@ def run_daily_screening(top_n=80, date_str=None, THRESHOLD=70):
         print("❌ 无法获取行情数据")
         return []
     print(f"  ✅ 候选股: {len(df)} 只\n")
-    
+
     # 2. 逐只分析
     results = []
     total = len(df)
-    
+
     for idx, (_, row) in enumerate(df.iterrows()):
         code = str(row['代码']).zfill(6)  # 确保补零
         name = row['名称']

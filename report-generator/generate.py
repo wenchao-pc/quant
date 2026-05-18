@@ -195,7 +195,7 @@ def get_backtest_stats():
     }
 
 
-def run_and_collect(top_n=80, date_str=None):
+def run_and_collect(top_n=40, date_str=None):
     """跑选股并收集所有数据。
 
     报告日期判断逻辑（date_str 为 None 时生效）：
