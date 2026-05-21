@@ -1,5 +1,12 @@
 [
   {
+    "date": "2026-05-21",
+    "weekday": "周四",
+    "signal_count": 0,
+    "total_scanned": 4299,
+    "generated_at": "2026-05-21 15:33:40"
+  },
+  {
     "date": "2026-05-20",
     "weekday": "周三",
     "signal_count": 0,
